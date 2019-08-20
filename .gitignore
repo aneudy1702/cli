@@ -1,3 +1,9 @@
+# Dist
+dist
+
+# Swap files
+*.swp
+
 # Logs
 logs
 *.log

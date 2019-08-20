@@ -1,0 +1,44 @@
+{
+  "name": "open-containers-manager",
+  "version": "1.0.0",
+  "main": "src/index.js",
+  "repository": "git@github.com:adeo/open-containers-manager.git",
+  "author": "Tony DUBURQUE <tony.duburque@leroymerlin.fr>",
+  "license": "MIT",
+  "scripts": {
+    "build": "babel src --out-dir dist",
+    "dev": "nodemon --watch src --exec yarn lint",
+    "lint": "eslint src/*",
+    "serve": "nodemon --watch src --exec babel-node src/index.js"
+  },
+  "dependencies": {
+    "cli-progress": "^3.0.0",
+    "downloads-folder": "^1.0.1",
+    "got": "^9.6.0",
+    "inquirer": "^6.5.1",
+    "nodegit": "^0.25.1",
+    "numeral": "^2.0.6",
+    "p-all": "^2.1.0",
+    "p-event": "^4.1.0",
+    "p-finally": "^2.0.1",
+    "p-if": "^2.1.0",
+    "p-log": "^2.1.0",
+    "p-race": "^2.1.0",
+    "p-retry": "^4.1.0",
+    "p-settle": "^3.1.0",
+    "p-tap": "^3.1.0",
+    "pify": "^4.0.1",
+    "speedometer": "^1.1.0"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.5.5",
+    "@babel/core": "^7.5.5",
+    "@babel/node": "^7.5.5",
+    "@babel/preset-env": "^7.5.5",
+    "babel-eslint": "^10.0.2",
+    "eslint": "^6.2.0",
+    "eslint-config-airbnb-base": "^14.0.0",
+    "eslint-plugin-import": "^2.18.2",
+    "nodemon": "^1.19.1"
+  }
+}
