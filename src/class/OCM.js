@@ -20,7 +20,10 @@ export default class OCM {
     const data = rawData.split('\n');
 
     return data.reduce((acc, line) => {
-      const matches = line.match(/^"?([^"=]+)"?=+"?([^"]*)"?$/);
+      const matches = line
+        .replace('\r', '')
+        .match(/^"?([^"=]+)"?=+"?([^"]*)"?$/);
+
       if (matches && matches.length === 3) {
         Object.assign(acc, { [matches[1].toLowerCase()]: matches[2] });
       }
