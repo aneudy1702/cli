@@ -4,7 +4,7 @@ import pify from 'pify';
 const pExec = pify(exec);
 
 function getArgs(options) {
-  return Object.keys(options || {}).map((key) => [`--${key}`, `${options[key] || ''}`].join(' ')).join(' ');
+  return Object.keys(options || {}).map((key) => [`--${key}`, `${typeof options[key] === 'string' ? options[key] : ''}`].join(' ')).join(' ');
 }
 
 export default class VirtualBox {
@@ -12,15 +12,6 @@ export default class VirtualBox {
     return pExec('VBoxManage --version')
       .then((stdout) => stdout.replace('\n', ''))
       .then((version) => ({ version }));
-  }
-
-  static list(type = 'vms') {
-    const regex = /"([^"]+)" {([^}]+)}/;
-    return pExec(`VBoxManage list ${type}`)
-      .then((stdout) => stdout.split('\n')
-        .filter((line) => line !== '')
-        .map((line) => line.match(regex))
-        .map((match) => ({ name: match[1], uuid: match[2] })));
   }
 
   static showvminfo(vm, options = {}) {
@@ -44,7 +35,7 @@ export default class VirtualBox {
     return pExec(`VBoxManage controlvm ${vm.uuid || vm.name || vm} resume`);
   }
 
-  static copyto(vm, src, dest, options) {
+  static copyto(vm, src, dest, options = {}) {
     const args = getArgs(options);
     return pExec(`VBoxManage guestcontrol ${vm.uuid || vm.name || vm} copyto ${args} ${src} ${dest}`);
   }
@@ -54,7 +45,7 @@ export default class VirtualBox {
     return pExec(`VBoxManage unregistervm ${vm.uuid || vm.name || vm} ${args}`);
   }
 
-  static import(ovaFile, options) {
+  static import(ovaFile, options = {}) {
     const args = getArgs(options);
     return pExec(`VBoxManage import "${ovaFile}" ${args}`);
   }

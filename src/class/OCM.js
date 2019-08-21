@@ -12,7 +12,7 @@ const { log } = console;
 
 export default class OCM {
   static get() {
-    return VirtualBox.showvminfo('OCM', { machinereadable: null })
+    return VirtualBox.showvminfo('OCM', { machinereadable: true })
       .then(OCM.parseInfo);
   }
 
@@ -113,7 +113,7 @@ export default class OCM {
 
     return OCM.get()
       .then((ocm) => pRetry(
-        () => VirtualBox.unregister(ocm, { delete: null }),
+        () => VirtualBox.unregister(ocm, { delete: true }),
         { forever: true, maxTimeout: 1000, maxRetryTime: 10000 },
       ));
   }
