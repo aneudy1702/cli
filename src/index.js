@@ -1,6 +1,7 @@
-import pLog from 'p-log';
 import Setup from './class/Setup';
 
+const { log, error } = console;
+
 Setup.install()
-  .then(pLog())
-  .catch(pLog(console.error));
+  .then(log)
+  .catch(error);

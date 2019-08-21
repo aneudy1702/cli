@@ -7,22 +7,23 @@
   "license": "MIT",
   "scripts": {
     "build": "babel src --out-dir dist",
-    "dev": "nodemon --watch src --exec yarn lint",
+    "dev": "nodemon --watch src -e js --exec yarn lint",
     "lint": "eslint src/*",
-    "serve": "nodemon --watch src --exec babel-node src/index.js"
+    "serve": "nodemon --watch src -e js --exec babel-node src/index.js"
   },
   "dependencies": {
     "cli-progress": "^3.0.0",
     "downloads-folder": "^1.0.1",
+    "fs-extra": "^8.1.0",
     "got": "^9.6.0",
     "inquirer": "^6.5.1",
     "nodegit": "^0.25.1",
     "numeral": "^2.0.6",
     "p-all": "^2.1.0",
+    "p-break": "^1.0.0",
     "p-event": "^4.1.0",
     "p-finally": "^2.0.1",
     "p-if": "^2.1.0",
-    "p-log": "^2.1.0",
     "p-race": "^2.1.0",
     "p-retry": "^4.1.0",
     "p-settle": "^3.1.0",

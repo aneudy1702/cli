@@ -1,29 +1,29 @@
 import inquirer from 'inquirer';
+import pBreak from 'p-break';
 import pIf from 'p-if';
-import pTap from 'p-tap';
-import download from './Download';
-import VirtualBox from './VirtualBox';
-import config from '../config';
+import OCM from './OCM';
+import SSH from './SSH';
 
-const ui = new inquirer.ui.BottomBar();
+const { log } = console;
 
 export default class Setup {
   static install() {
-    return VirtualBox.list()
-      .then((vms) => vms.find((vm) => vm.name === 'OCM'))
-      .then(pIf(
-        (find) => find !== undefined,
-        () => Setup.askToDelete()
-          .then(pIf((answer) => answer.delete, Setup.deleteOCM, Setup.exit)),
-      ))
-      .then(() => ui.log.write('Downloading OCM archive...'))
-      .then(Setup.downloadOCM)
-      .then(pTap(() => ui.log.write('Importing OCM archive...')))
-      .then((ovaFile) => VirtualBox.import(ovaFile));
-  }
-
-  static exit() {
-    process.exit();
+    return SSH.findKey()
+      .catch((err) => {
+        log(err.message);
+        Setup.exit();
+      })
+      .then(OCM.get)
+      .catch(() => pBreak())
+      .then(Setup.askToDelete)
+      .then(pIf((answer) => answer.delete, OCM.delete, Setup.exit))
+      .catch(pBreak.end)
+      .then(OCM.download)
+      .then(OCM.import)
+      .then(OCM.start)
+      .then(OCM.waitGuestAdditionnals)
+      .then(OCM.importSSHKey)
+      .then(OCM.pause);
   }
 
   static askToDelete() {
@@ -35,19 +35,7 @@ export default class Setup {
     });
   }
 
-  static deleteOCM() {
-    return VirtualBox.list('runningvms')
-      .then((vms) => vms.find((vm) => vm.name === 'OCM'))
-      .then(pTap(pIf((vm) => vm !== undefined, (ocm) => VirtualBox.stopvm(ocm))))
-      .then(VirtualBox.list)
-      .then((vms) => vms.find((vm) => vm.name === 'OCM'))
-      .then((ocm) => VirtualBox.unregister(ocm, { retry: 10 }));
-  }
-
-  static downloadOCM() {
-    return download(config.ocm.repository.url, {
-      path: config.ocm.download.path,
-      file: config.ocm.download.file,
-    });
+  static exit() {
+    process.exit();
   }
 }

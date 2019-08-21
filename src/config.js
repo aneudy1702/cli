@@ -9,5 +9,14 @@ export default {
       path: process.env.OCM_DOWNLOAD_PATH || os.tmpdir(),
       file: process.env.OCM_DOWNLOAD_FILE || 'OCM.ova',
     },
+    ssh: {
+      authorizedKeys: {
+        path: '/home/ocm/.ssh/authorized_keys',
+      },
+      credential: {
+        username: 'ocm',
+        password: 'ocm',
+      },
+    },
   },
 };

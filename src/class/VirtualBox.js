@@ -1,8 +1,11 @@
 import { exec } from 'child_process';
 import pify from 'pify';
-import pRetry from 'p-retry';
 
 const pExec = pify(exec);
+
+function getArgs(options) {
+  return Object.keys(options || {}).map((key) => [`--${key}`, `${options[key] || ''}`].join(' ')).join(' ');
+}
 
 export default class VirtualBox {
   static version() {
@@ -20,15 +23,39 @@ export default class VirtualBox {
         .map((match) => ({ name: match[1], uuid: match[2] })));
   }
 
+  static showvminfo(vm, options = {}) {
+    const args = getArgs(options);
+    return pExec(`VBoxManage showvminfo ${vm.uuid || vm.name || vm} ${args}`);
+  }
+
+  static startvm(vm, type = 'headless') {
+    return pExec(`VBoxManage startvm --type ${type} ${vm.uuid || vm.name || vm}`);
+  }
+
   static stopvm(vm) {
-    return pExec(`VBoxManage controlvm ${vm.uuid} poweroff`);
+    return pExec(`VBoxManage controlvm ${vm.uuid || vm.name || vm} poweroff`);
   }
 
-  static unregister(vm, retry = { retry: 1 }) {
-    return pRetry(() => pExec(`VBoxManage unregistervm ${vm.uuid} --delete`), retry);
+  static pause(vm) {
+    return pExec(`VBoxManage controlvm ${vm.uuid || vm.name || vm} pause`);
   }
 
-  static import(ovaFile) {
-    return pExec(`VBoxManage import ${ovaFile} --vsys 0 --eula accept`);
+  static resume(vm) {
+    return pExec(`VBoxManage controlvm ${vm.uuid || vm.name || vm} resume`);
+  }
+
+  static copyto(vm, src, dest, options) {
+    const args = getArgs(options);
+    return pExec(`VBoxManage guestcontrol ${vm.uuid || vm.name || vm} copyto ${args} ${src} ${dest}`);
+  }
+
+  static unregister(vm, options = {}) {
+    const args = getArgs(options);
+    return pExec(`VBoxManage unregistervm ${vm.uuid || vm.name || vm} ${args}`);
+  }
+
+  static import(ovaFile, options) {
+    const args = getArgs(options);
+    return pExec(`VBoxManage import "${ovaFile}" ${args}`);
   }
 }

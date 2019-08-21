@@ -1828,6 +1828,15 @@ fs-extra@^7.0.0:
     jsonfile "^4.0.0"
     universalify "^0.1.0"
 
+fs-extra@^8.1.0:
+  version "8.1.0"
+  resolved "https://registry.yarnpkg.com/fs-extra/-/fs-extra-8.1.0.tgz#49d43c45a88cd9677668cb7be1b46efdb8d2e1c0"
+  integrity sha512-yhlQgA6mnOJUKOsRUFsgJdQCvkKhcz8tlZG5HBQfReYZy46OwLcY+Zia0mtdHsOo9y/hP+CxMN0TU9QxoOtG4g==
+  dependencies:
+    graceful-fs "^4.2.0"
+    jsonfile "^4.0.0"
+    universalify "^0.1.0"
+
 fs-minipass@^1.2.5:
   version "1.2.6"
   resolved "https://registry.yarnpkg.com/fs-minipass/-/fs-minipass-1.2.6.tgz#2c5cc30ded81282bfe8a0d7c7c1853ddeb102c07"
@@ -1981,7 +1990,7 @@ got@^9.6.0:
     to-readable-stream "^1.0.0"
     url-parse-lax "^3.0.0"
 
-graceful-fs@^4.1.11, graceful-fs@^4.1.2, graceful-fs@^4.1.6:
+graceful-fs@^4.1.11, graceful-fs@^4.1.2, graceful-fs@^4.1.6, graceful-fs@^4.2.0:
   version "4.2.2"
   resolved "https://registry.yarnpkg.com/graceful-fs/-/graceful-fs-4.2.2.tgz#6f0952605d0140c1cfdb138ed005775b92d67b02"
   integrity sha512-IItsdsea19BoLC7ELy13q1iJFNmd7ofZH5+X/pJr90/nRoPEX0DJo1dHDbgtYWOhJhcCgMDTOw84RZ72q6lB+Q==
@@ -3100,6 +3109,11 @@ p-all@^2.1.0:
   dependencies:
     p-map "^2.0.0"
 
+p-break@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/p-break/-/p-break-1.0.0.tgz#89735a5d19d4814ac91e81b8a63ddeecf8bd7a92"
+  integrity sha512-hZ/dcgAW3d3xuevbjbdYXQkARRcubPdFwHmJU7bJHB1AiAGuIsEREYuZ9UBvoyNKcDmdMFGIHeR9YeaLIDkCCg==
+
 p-cancelable@^1.0.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/p-cancelable/-/p-cancelable-1.1.0.tgz#d078d15a3af409220c886f1d9a0ca2e441ab26cc"
@@ -3155,13 +3169,6 @@ p-locate@^3.0.0:
   dependencies:
     p-limit "^2.0.0"
 
-p-log@^2.1.0:
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/p-log/-/p-log-2.1.0.tgz#81148069258967f3022c19bedab1e024a1d5d8d0"
-  integrity sha512-ekgJ1wFvul3jmYL7IT082GYQ7UTBKi0E6ez6Ahgv/DtvtDha8W4mtR+CtdG3G+SQxLUEGSkQRUV5ftrcWnrJBQ==
-  dependencies:
-    p-tap "^3.0.0"
-
 p-map@^2.0.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/p-map/-/p-map-2.1.0.tgz#310928feef9c9ecc65b68b17693018a665cea175"
@@ -3195,7 +3202,7 @@ p-settle@^3.1.0:
     p-limit "^2.2.0"
     p-reflect "^2.0.0"
 
-p-tap@^3.0.0, p-tap@^3.1.0:
+p-tap@^3.1.0:
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/p-tap/-/p-tap-3.1.0.tgz#ceea85e92164e12b1c2b1caf78b4dc2ee51c9b5f"
   integrity sha512-xJSaeByOOQu5GnHEcnrxMkNi8O3Ez5X1wz8RT6wiL3mJFd4oXcSOvcKq+1CFUtuVYTSTWL/8rlkaCJRoR+L+NA==
