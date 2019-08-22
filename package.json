@@ -17,6 +17,7 @@
     "fs-extra": "^8.1.0",
     "got": "^9.6.0",
     "inquirer": "^6.5.1",
+    "node-forge": "^0.8.5",
     "nodegit": "^0.25.1",
     "numeral": "^2.0.6",
     "p-all": "^2.1.0",
@@ -29,7 +30,8 @@
     "p-settle": "^3.1.0",
     "p-tap": "^3.1.0",
     "pify": "^4.0.1",
-    "speedometer": "^1.1.0"
+    "speedometer": "^1.1.0",
+    "ssh2": "^0.8.5"
   },
   "devDependencies": {
     "@babel/cli": "^7.5.5",
