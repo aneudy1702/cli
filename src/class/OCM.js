@@ -1,4 +1,5 @@
 import fs from 'fs-extra';
+import ora from 'ora';
 import path from 'path';
 import pIf from 'p-if';
 import pFinally from 'p-finally';
@@ -9,7 +10,6 @@ import VirtualBox from './VirtualBox';
 import config from '../config';
 
 const { ssh } = config.ocm;
-const { log } = console;
 
 export default class OCM {
   static get() {
@@ -40,8 +40,6 @@ export default class OCM {
   }
 
   static download() {
-    log('Downloading OCM archive...');
-
     return pIf(
       !/^file:/.test(config.ocm.repository.url),
       () => download(config.ocm.repository.url, {
@@ -53,9 +51,9 @@ export default class OCM {
   }
 
   static import(ovafile) {
-    log('Importing OCM archive...');
-
-    return VirtualBox.import(ovafile, { vsys: '0', eula: 'accept' });
+    const spinner = ora('Importing OCM Archive').start();
+    return VirtualBox.import(ovafile, { vsys: '0', eula: 'accept' })
+      .then(() => spinner.stop());
   }
 
   static existsSSHKeys() {
@@ -63,10 +61,10 @@ export default class OCM {
   }
 
   static generateSSHKeys() {
-    log('Generating keys...');
-
+    const spinner = ora('Generating keys').start();
     return SSH.generatePairKey(ssh.keys.comment, ssh.keys.type, ssh.keys.generateOptions)
-      .then(OCM.saveSSHKeys);
+      .then(OCM.saveSSHKeys)
+      .then(() => spinner.stop());
   }
 
   static saveSSHKeys(keys) {
@@ -80,80 +78,79 @@ export default class OCM {
 
 
   static importSSHKey() {
-    log('Importing ssh key');
-
+    const spinner = ora('Importing SSH key').start();
     return OCM.get()
       .then((ocm) => VirtualBox.copyto(
         ocm,
         path.join(ssh.keys.path, ssh.keys.public),
         ssh.authorizedKeys.path,
         ssh.credential,
-      ));
+      ))
+      .then(() => spinner.stop());
   }
 
   static start() {
-    log('Starting OCM...');
-
+    const spinner = ora('Starting OCM').start();
     return OCM.get()
       .then(pIf(
         (ocm) => ocm.vmstate !== 'running',
         VirtualBox.startvm,
-      ));
+      ))
+      .then(() => spinner.stop());
   }
 
   static pause() {
-    log('Pausing OCM...');
-
+    const spinner = ora('Pausing OCM').start();
     return OCM.get()
       .then(pIf(
         (ocm) => ocm.vmstate === 'running',
         VirtualBox.pause,
-      ));
+      ))
+      .then(() => spinner.stop());
   }
 
   static resume() {
-    log('Resumingg OCM...');
-
+    const spinner = ora('Resuming OCM').start();
     return OCM.get()
       .then(pIf(
         (ocm) => ocm.vmstate !== 'running',
         VirtualBox.resume,
-      ));
+      ))
+      .then(() => spinner.stop());
   }
 
   static stop() {
-    log('Stoping OCM...');
-
+    const spinner = ora('Stoping OCM').start();
     return OCM.get()
       .then(pIf(
         (ocm) => ocm.vmstate === 'running' || ocm.vmstate === 'paused',
         VirtualBox.stopvm,
-      ));
+      ))
+      .then(() => spinner.stop());
   }
 
   static acpipower() {
-    log('Stoping OCM by acpi...');
-
+    const spinner = ora('Stoping OCM by acpi').start();
     return OCM.get()
       .then(pIf(
         (ocm) => ocm.vmstate === 'running',
         VirtualBox.acpipowerbutton,
-      ));
+      ))
+      .then(() => spinner.stop());
   }
 
   static unregister() {
-    log('Unregisterg OCM...');
-
+    const spinner = ora('Unregistering OCM').start();
     return OCM.get()
       .then((ocm) => pRetry(
         () => VirtualBox.unregister(ocm, { delete: true }),
         { forever: true, maxTimeout: 1000, maxRetryTime: 10000 },
-      ));
+      ))
+      .then(() => spinner.stop());
   }
 
   static waitGuestAdditionnals() {
-    log('Waiting guest additions running');
-
+    const spinner = ora('Waiting guest additions running').start();
     return pRetry(
       () => OCM.get()
         .then(pIf(
@@ -165,7 +162,8 @@ export default class OCM {
         maxTimeout: 1000,
         maxRetryTime: 30000,
       },
-    );
+    )
+      .then(() => spinner.stop());
   }
 
   static exec(cmd) {

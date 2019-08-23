@@ -7,6 +7,7 @@ import pEvent from 'p-event';
 import pFinally from 'p-finally';
 import pRace from 'p-race';
 import speedometer from 'speedometer';
+import Spinner from './Spinner';
 
 const bytesFormat = '0.00 ib';
 
@@ -17,11 +18,15 @@ export default function download(url, dest) {
   const prettyTotal = numeral(0);
 
   const speed = speedometer();
+  const spinner = new Spinner().start();
+
   const progressBar = new cliProgress.Bar({
-    format: '{bar} {percentage}% | {filename} | {prettySpeed}/s | {prettyValue} / {prettyTotal}',
+    format: '{spin} Downloading OCM archive | {bar} {percentage}% | {prettySpeed}/s | {prettyValue} / {prettyTotal}',
     hideCursor: true,
     barCompleteChar: '\u2588',
     barIncompleteChar: '\u2591',
+    stopOnComplete: true,
+    clearOnComplete: true,
   });
 
   const dl = got.stream(url, { timeout: { socket: 10000 } });
@@ -33,7 +38,7 @@ export default function download(url, dest) {
 
     prettyTotal.set(total);
     progressBar.start(total, start, {
-      filename: dest.file,
+      spin: spinner.get(),
       prettySpeed: prettySpeed.format(bytesFormat),
       prettyValue: prettyValue.format(bytesFormat),
       prettyTotal: prettyTotal.format(bytesFormat),
@@ -45,6 +50,7 @@ export default function download(url, dest) {
     prettyValue.set(progress.transferred);
 
     progressBar.update(progress.transferred, {
+      spin: spinner.get(),
       prettySpeed: prettySpeed.format(bytesFormat),
       prettyValue: prettyValue.format(bytesFormat),
     });
@@ -57,7 +63,7 @@ export default function download(url, dest) {
       pEvent(dl, 'end'),
       pEvent(dl, 'error'),
     ]),
-    () => progressBar.stop(),
+    () => spinner.stop(),
   )
     .then(() => path.join(dest.path, dest.file));
 }
