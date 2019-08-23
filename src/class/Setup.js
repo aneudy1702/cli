@@ -13,7 +13,7 @@ export default class Setup {
       .then(Setup.ask)
       .then(pTap(pIf((answers) => answers.deleteOCM === false, Setup.exit)))
       .then(pTap(pIf((answers) => answers.deleteOCM === true, OCM.delete)))
-      .then(pIf((answers) => answers.keepOCMSSHKeys === false, OCM.generateSSHKeys))
+      .then(pIf((answers) => answers.keepOCMSSHKeys !== true, OCM.generateSSHKeys))
       .then(OCM.download)
       .then(OCM.import)
       .then(OCM.start)
