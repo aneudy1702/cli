@@ -1,6 +1,7 @@
 import inquirer from 'inquirer';
 import pIf from 'p-if';
 import pSettle from 'p-settle';
+import pTap from 'p-tap';
 import OCM from './OCM';
 
 export default class Setup {
@@ -10,8 +11,8 @@ export default class Setup {
       OCM.existsSSHKeys(),
     ])
       .then(Setup.ask)
-      .then(pIf((answers) => answers.deleteOCM === false, Setup.exit))
-      .then(pIf((answers) => answers.deleteOCM === true, OCM.delete))
+      .then(pTap(pIf((answers) => answers.deleteOCM === false, Setup.exit)))
+      .then(pTap(pIf((answers) => answers.deleteOCM === true, OCM.delete)))
       .then(pIf((answers) => answers.keepOCMSSHKeys === false, OCM.generateSSHKeys))
       .then(OCM.download)
       .then(OCM.import)

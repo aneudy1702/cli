@@ -71,4 +71,38 @@ export default class SSH {
       client.on('end', () => resolve());
     });
   }
+
+  static shell(privateKey, options = {}) {
+    return new Promise((resolve, reject) => {
+      const client = new Client();
+      const shell = pify(client.shell.bind(client));
+      const defaultOptions = {
+        stdin: process.stdin,
+        stdout: process.stdout,
+        stderr: process.stderr,
+      };
+      const { stdin, stdout, stderr } = { ...defaultOptions, ...options };
+
+      client.on('ready', () => {
+        shell()
+          .then((stream) => {
+            stdin.on('data', (data) => { stream.write(data); });
+            stream.on('data', (data) => { stdout.write(data); });
+            stream.stderr.on('data', (data) => { stderr.write(data); });
+            stream.on('close', () => { stdin.destroy(); client.end(); });
+          })
+          .catch((err) => reject(err));
+      });
+
+      client.connect({
+        host: config.ocm.ssh.host,
+        port: config.ocm.ssh.port,
+        username: config.ocm.ssh.credential.username,
+        privateKey,
+      });
+
+      client.on('error', (err) => reject(err));
+      client.on('end', () => resolve());
+    });
+  }
 }

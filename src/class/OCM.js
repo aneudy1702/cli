@@ -131,6 +131,16 @@ export default class OCM {
       ));
   }
 
+  static acpipower() {
+    log('Stoping OCM by acpi...');
+
+    return OCM.get()
+      .then(pIf(
+        (ocm) => ocm.vmstate === 'running',
+        VirtualBox.acpipowerbutton,
+      ));
+  }
+
   static unregister() {
     log('Unregisterg OCM...');
 
@@ -156,5 +166,15 @@ export default class OCM {
         maxRetryTime: 30000,
       },
     );
+  }
+
+  static exec(cmd) {
+    return fs.readFile(path.join(ssh.keys.path, ssh.keys.private))
+      .then((privateKey) => SSH.exec(cmd, privateKey));
+  }
+
+  static shell() {
+    return fs.readFile(path.join(ssh.keys.path, ssh.keys.private))
+      .then((privateKey) => SSH.shell(privateKey));
   }
 }

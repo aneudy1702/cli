@@ -27,6 +27,10 @@ export default class VirtualBox {
     return pExec(`VBoxManage controlvm ${vm.uuid || vm.name || vm} poweroff`);
   }
 
+  static acpipowerbutton(vm) {
+    return pExec(`VBoxManage controlvm ${vm.uuid || vm.name || vm} acpipowerbutton`);
+  }
+
   static pause(vm) {
     return pExec(`VBoxManage controlvm ${vm.uuid || vm.name || vm} pause`);
   }
