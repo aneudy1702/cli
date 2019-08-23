@@ -1,38 +1,57 @@
 import inquirer from 'inquirer';
-import pBreak from 'p-break';
 import pIf from 'p-if';
+import pSettle from 'p-settle';
 import OCM from './OCM';
-import SSH from './SSH';
-
-const { log } = console;
 
 export default class Setup {
   static install() {
-    return SSH.findKey()
-      .catch((err) => {
-        log(err.message);
-        Setup.exit();
-      })
-      .then(OCM.get)
-      .catch(() => pBreak())
-      .then(Setup.askToDelete)
-      .then(pIf((answer) => answer.delete, OCM.delete, Setup.exit))
-      .catch(pBreak.end)
+    return pSettle([
+      OCM.get(),
+      OCM.existsSSHKeys(),
+    ])
+      .then(Setup.ask)
+      .then(pIf((answers) => answers.deleteOCM === false, Setup.exit))
+      .then(pIf((answers) => answers.deleteOCM === true, OCM.delete))
+      .then(pIf((answers) => answers.keepOCMSSHKeys === false, OCM.generateSSHKeys))
       .then(OCM.download)
       .then(OCM.import)
       .then(OCM.start)
       .then(OCM.waitGuestAdditionnals)
-      .then(OCM.importSSHKey)
-      .then(OCM.pause);
+      .then(OCM.importSSHKey);
   }
 
-  static askToDelete() {
-    return inquirer.prompt({
-      type: 'confirm',
-      name: 'delete',
-      default: false,
-      message: 'OCM already installed, would you reinstall ?',
+  static ask(checks) {
+    const questions = [];
+
+    checks.forEach((check, i) => {
+      switch (i) {
+        case 0:
+          if (check.isFulfilled) {
+            questions.push({
+              type: 'confirm',
+              name: 'deleteOCM',
+              default: false,
+              message: 'OCM already installed, would you reinstall ?',
+            });
+          }
+          break;
+        case 1:
+          if (check.isFulfilled && check.value) {
+            questions.push({
+              type: 'confirm',
+              name: 'keepOCMSSHKeys',
+              default: true,
+              message: 'OCM SSH keys found, would you keep them ?',
+              when: (answers) => answers.deleteOCM !== false,
+            });
+          }
+          break;
+        default:
+          break;
+      }
     });
+
+    return inquirer.prompt(questions);
   }
 
   static exit() {

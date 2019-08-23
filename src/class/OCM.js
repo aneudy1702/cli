@@ -1,13 +1,14 @@
-import pAll from 'p-all';
+import fs from 'fs-extra';
+import path from 'path';
 import pIf from 'p-if';
 import pFinally from 'p-finally';
 import pRetry from 'p-retry';
-import pTap from 'p-tap';
 import download from './Download';
 import SSH from './SSH';
 import VirtualBox from './VirtualBox';
 import config from '../config';
 
+const { ssh } = config.ocm;
 const { log } = console;
 
 export default class OCM {
@@ -57,17 +58,36 @@ export default class OCM {
     return VirtualBox.import(ovafile, { vsys: '0', eula: 'accept' });
   }
 
+  static existsSSHKeys() {
+    return SSH.existsKeys('ocm_rsa');
+  }
+
+  static generateSSHKeys() {
+    log('Generating keys...');
+
+    return SSH.generatePairKey(ssh.keys.comment, ssh.keys.type, ssh.keys.generateOptions)
+      .then(OCM.saveSSHKeys);
+  }
+
+  static saveSSHKeys(keys) {
+    return fs.outputFile(path.join(ssh.keys.path, ssh.keys.public), keys.public)
+      .then(() => fs.outputFile(
+        path.join(ssh.keys.path, ssh.keys.private),
+        keys.private,
+        { mode: 384 },
+      ));
+  }
+
+
   static importSSHKey() {
-    return pAll([
-      OCM.get,
-      SSH.findKey,
-    ])
-      .then(pTap(() => log('Importing ssh key')))
-      .then(([ocm, key]) => VirtualBox.copyto(
+    log('Importing ssh key');
+
+    return OCM.get()
+      .then((ocm) => VirtualBox.copyto(
         ocm,
-        key,
-        config.ocm.ssh.authorizedKeys.path,
-        config.ocm.ssh.credential,
+        path.join(ssh.keys.path, ssh.keys.public),
+        ssh.authorizedKeys.path,
+        ssh.credential,
       ));
   }
 
