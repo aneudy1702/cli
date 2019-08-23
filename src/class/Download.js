@@ -21,7 +21,7 @@ export default function download(url, dest) {
   const spinner = new Spinner().start();
 
   const progressBar = new cliProgress.Bar({
-    format: '{spin} Downloading OCM archive | {bar} {percentage}% | {prettySpeed}/s | {prettyValue} / {prettyTotal}',
+    format: '{spin} Downloading OCM | {bar} {percentage}% | {prettySpeed}/s | {prettyValue} / {prettyTotal}',
     hideCursor: true,
     barCompleteChar: '\u2588',
     barIncompleteChar: '\u2591',

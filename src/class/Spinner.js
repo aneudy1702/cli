@@ -3,7 +3,12 @@ import cliSpinners from 'cli-spinners';
 
 export default class {
   constructor() {
-    Object.assign(this, cliSpinners.dots);
+    if (process.platform === 'win32') {
+      Object.assign(this, cliSpinners.line);
+    } else {
+      Object.assign(this, cliSpinners.dots);
+    }
+    
     this.index = 0;
     this.runner = null;
   }
