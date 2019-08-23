@@ -176,11 +176,11 @@ export default class OCM {
             (ocm) => ocm.vmstate !== 'running' || ocm.guestadditionsrunlevel !== '2',
             () => { throw new Error('Guest addtionals not running'); },
           )),
-          {
-            forever: true,
-            maxTimeout: 1000,
-            maxRetryTime: 30000,
-          },
+        {
+          forever: true,
+          maxTimeout: 1000,
+          maxRetryTime: 30000,
+        },
       ),
       () => spinner.stop(),
     );
