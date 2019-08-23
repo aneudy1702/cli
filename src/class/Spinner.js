@@ -8,7 +8,7 @@ export default class {
     } else {
       Object.assign(this, cliSpinners.dots);
     }
-    
+
     this.index = 0;
     this.runner = null;
   }
