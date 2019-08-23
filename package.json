@@ -1,10 +1,12 @@
 {
-  "name": "open-containers-manager",
+  "name": "@open-containers-manager/ocm-cli",
   "version": "1.0.0",
-  "main": "src/index.js",
   "repository": "git@github.com:adeo/open-containers-manager.git",
   "author": "Tony DUBURQUE <tony.duburque@leroymerlin.fr>",
   "license": "MIT",
+  "bin": {
+    "ocm": "./dist/index.js"
+  },
   "scripts": {
     "build": "babel src --out-dir dist",
     "dev": "nodemon --watch src -e js --exec yarn lint",
