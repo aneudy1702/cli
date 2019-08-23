@@ -52,8 +52,10 @@ export default class OCM {
 
   static import(ovafile) {
     const spinner = ora('Importing OCM Archive').start();
-    return VirtualBox.import(ovafile, { vsys: '0', eula: 'accept' })
-      .then(() => spinner.stop());
+    return pFinally(
+      VirtualBox.import(ovafile, { vsys: '0', eula: 'accept' }),
+      () => spinner.stop(),
+    );
   }
 
   static existsSSHKeys() {
@@ -62,9 +64,11 @@ export default class OCM {
 
   static generateSSHKeys() {
     const spinner = ora('Generating keys').start();
-    return SSH.generatePairKey(ssh.keys.comment, ssh.keys.type, ssh.keys.generateOptions)
-      .then(OCM.saveSSHKeys)
-      .then(() => spinner.stop());
+    return pFinally(
+      SSH.generatePairKey(ssh.keys.comment, ssh.keys.type, ssh.keys.generateOptions)
+        .then(OCM.saveSSHKeys),
+      () => spinner.stop(),
+    );
   }
 
   static saveSSHKeys(keys) {
@@ -79,91 +83,107 @@ export default class OCM {
 
   static importSSHKey() {
     const spinner = ora('Importing SSH key').start();
-    return OCM.get()
-      .then((ocm) => VirtualBox.copyto(
-        ocm,
-        path.join(ssh.keys.path, ssh.keys.public),
-        ssh.authorizedKeys.path,
-        ssh.credential,
-      ))
-      .then(() => spinner.stop());
+    return pFinally(
+      OCM.get()
+        .then((ocm) => VirtualBox.copyto(
+          ocm,
+          path.join(ssh.keys.path, ssh.keys.public),
+          ssh.authorizedKeys.path,
+          ssh.credential,
+        )),
+      () => spinner.stop(),
+    );
   }
 
   static start() {
     const spinner = ora('Starting OCM').start();
-    return OCM.get()
-      .then(pIf(
-        (ocm) => ocm.vmstate !== 'running',
-        VirtualBox.startvm,
-      ))
-      .then(() => spinner.stop());
+    return pFinally(
+      OCM.get()
+        .then(pIf(
+          (ocm) => ocm.vmstate !== 'running',
+          VirtualBox.startvm,
+        )),
+      () => spinner.stop(),
+    );
   }
 
   static pause() {
     const spinner = ora('Pausing OCM').start();
-    return OCM.get()
-      .then(pIf(
-        (ocm) => ocm.vmstate === 'running',
-        VirtualBox.pause,
-      ))
-      .then(() => spinner.stop());
+    return pFinally(
+      OCM.get()
+        .then(pIf(
+          (ocm) => ocm.vmstate === 'running',
+          VirtualBox.pause,
+        )),
+      () => spinner.stop(),
+    );
   }
 
   static resume() {
     const spinner = ora('Resuming OCM').start();
-    return OCM.get()
-      .then(pIf(
-        (ocm) => ocm.vmstate !== 'running',
-        VirtualBox.resume,
-      ))
-      .then(() => spinner.stop());
+    return pFinally(
+      OCM.get()
+        .then(pIf(
+          (ocm) => ocm.vmstate !== 'running',
+          VirtualBox.resume,
+        )),
+      () => spinner.stop(),
+    );
   }
 
   static stop() {
     const spinner = ora('Stoping OCM').start();
-    return OCM.get()
-      .then(pIf(
-        (ocm) => ocm.vmstate === 'running' || ocm.vmstate === 'paused',
-        VirtualBox.stopvm,
-      ))
-      .then(() => spinner.stop());
+    return pFinally(
+      OCM.get()
+        .then(pIf(
+          (ocm) => ocm.vmstate === 'running' || ocm.vmstate === 'paused',
+          VirtualBox.stopvm,
+        )),
+      () => spinner.stop(),
+    );
   }
 
   static acpipower() {
     const spinner = ora('Stoping OCM by acpi').start();
-    return OCM.get()
-      .then(pIf(
-        (ocm) => ocm.vmstate === 'running',
-        VirtualBox.acpipowerbutton,
-      ))
-      .then(() => spinner.stop());
+    return pFinally(
+      OCM.get()
+        .then(pIf(
+          (ocm) => ocm.vmstate === 'running',
+          VirtualBox.acpipowerbutton,
+        )),
+      () => spinner.stop(),
+    );
   }
 
   static unregister() {
     const spinner = ora('Unregistering OCM').start();
-    return OCM.get()
-      .then((ocm) => pRetry(
-        () => VirtualBox.unregister(ocm, { delete: true }),
-        { forever: true, maxTimeout: 1000, maxRetryTime: 10000 },
-      ))
-      .then(() => spinner.stop());
+    return pFinally(
+      OCM.get()
+        .then((ocm) => pRetry(
+          () => VirtualBox.unregister(ocm, { delete: true }),
+          { forever: true, maxTimeout: 1000, maxRetryTime: 10000 },
+        )),
+      () => spinner.stop(),
+    );
   }
 
   static waitGuestAdditionnals() {
     const spinner = ora('Waiting guest additions running').start();
-    return pRetry(
-      () => OCM.get()
-        .then(pIf(
-          (ocm) => ocm.vmstate !== 'running' || ocm.guestadditionsrunlevel !== '2',
-          () => { throw new Error('Guest addtionals not running'); },
-        )),
-      {
-        forever: true,
-        maxTimeout: 1000,
-        maxRetryTime: 30000,
-      },
-    )
-      .then(() => spinner.stop());
+    return pFinally(
+      pRetry(
+        () => OCM.get()
+          .then(pIf(
+            (ocm) => ocm.vmstate !== 'running' || ocm.guestadditionsrunlevel !== '2',
+            () => { throw new Error('Guest addtionals not running'); },
+          )),
+          {
+            forever: true,
+            maxTimeout: 1000,
+            maxRetryTime: 30000,
+          },
+      ),
+      () => spinner.stop(),
+    );
   }
 
   static exec(cmd) {
