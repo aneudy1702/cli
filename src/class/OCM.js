@@ -41,22 +41,24 @@ export default class OCM {
   }
 
   static download() {
+    const spinner = ora();
     return pIf(
       !/^file:/.test(config.ocm.repository.url),
       () => download(config.ocm.repository.url, {
         path: config.ocm.download.path,
         file: config.ocm.download.file,
-      }),
+      })
+        .then(pTap(() => spinner.succeed('OCM archive downloaded')))
+        .catch(pTap.catch(() => spinner.fail())),
       () => config.ocm.repository.url.replace(/^file:\/\//, ''),
     )();
   }
 
   static import(ovafile) {
-    const spinner = ora('Importing OCM Archive').start();
-    return pFinally(
-      VirtualBox.import(ovafile, { vsys: '0', eula: 'accept' }),
-      () => spinner.stop(),
-    );
+    const spinner = ora('Importing OCM archive').start();
+    return VirtualBox.import(ovafile, { vsys: '0', eula: 'accept' })
+      .then(() => spinner.succeed('OCM archive imported'))
+      .catch(pTap.catch(() => spinner.fail()));
   }
 
   static existsSSHKeys() {
@@ -64,12 +66,11 @@ export default class OCM {
   }
 
   static generateSSHKeys() {
-    const spinner = ora('Generating keys').start();
-    return pFinally(
-      SSH.generatePairKey(ssh.keys.comment, ssh.keys.type, ssh.keys.generateOptions)
-        .then(OCM.saveSSHKeys),
-      () => spinner.stop(),
-    );
+    const spinner = ora('Generating SSH keys').start();
+    return SSH.generatePairKey(ssh.keys.comment, ssh.keys.type, ssh.keys.generateOptions)
+      .then(OCM.saveSSHKeys)
+      .then(() => spinner.succeed('SSH keys generated'))
+      .catch(pTap.catch(() => spinner.fail()));
   }
 
   static saveSSHKeys(keys) {
@@ -83,112 +84,104 @@ export default class OCM {
 
   static importSSHKey() {
     const spinner = ora('Importing SSH key').start();
-    return pFinally(
-      OCM.get()
-        .then(pTap((ocm) => VirtualBox.mkdir(
-          ocm,
-          path.dirname(ssh.authorizedKeys.path),
-          ssh.credential,
-        )))
-        .then((ocm) => VirtualBox.copyto(
-          ocm,
-          path.join(ssh.keys.path, ssh.keys.public),
-          ssh.authorizedKeys.path,
-          ssh.credential,
-        )),
-      () => spinner.stop(),
-    );
+    return OCM.get()
+      .then(pTap((ocm) => VirtualBox.mkdir(
+        ocm,
+        path.dirname(ssh.authorizedKeys.path),
+        ssh.credential,
+      )))
+      .then((ocm) => VirtualBox.copyto(
+        ocm,
+        path.join(ssh.keys.path, ssh.keys.public),
+        ssh.authorizedKeys.path,
+        ssh.credential,
+      ))
+      .then(() => spinner.succeed('SSH keys imported'))
+      .catch(pTap.catch(() => spinner.fail()));
   }
 
   static start() {
     const spinner = ora('Starting OCM').start();
-    return pFinally(
-      OCM.get()
-        .then(pIf(
-          (ocm) => ocm.vmstate !== 'running',
-          VirtualBox.startvm,
-        )),
-      () => spinner.stop(),
-    );
+    return OCM.get()
+      .then(pIf(
+        (ocm) => ocm.vmstate !== 'running',
+        VirtualBox.startvm,
+      ))
+      .then(() => spinner.succeed('OCM started'))
+      .catch(pTap.catch(() => spinner.fail()));
   }
 
   static pause() {
     const spinner = ora('Pausing OCM').start();
-    return pFinally(
-      OCM.get()
-        .then(pIf(
-          (ocm) => ocm.vmstate === 'running',
-          VirtualBox.pause,
-        )),
-      () => spinner.stop(),
-    );
+    return OCM.get()
+      .then(pIf(
+        (ocm) => ocm.vmstate === 'running',
+        VirtualBox.pause,
+      ))
+      .then(() => spinner.succeed('OCM paused'))
+      .catch(pTap.catch(() => spinner.fail()));
   }
 
   static resume() {
     const spinner = ora('Resuming OCM').start();
-    return pFinally(
-      OCM.get()
-        .then(pIf(
-          (ocm) => ocm.vmstate !== 'running',
-          VirtualBox.resume,
-        )),
-      () => spinner.stop(),
-    );
+    return OCM.get()
+      .then(pIf(
+        (ocm) => ocm.vmstate !== 'running',
+        VirtualBox.resume,
+      ))
+      .then(() => spinner.succeed('OCM resumed'))
+      .catch(pTap.catch(() => spinner.fail()));
   }
 
   static stop() {
     const spinner = ora('Stoping OCM').start();
-    return pFinally(
-      OCM.get()
-        .then(pIf(
-          (ocm) => ocm.vmstate === 'running' || ocm.vmstate === 'paused',
-          VirtualBox.stopvm,
-        )),
-      () => spinner.stop(),
-    );
+    return OCM.get()
+      .then(pIf(
+        (ocm) => ocm.vmstate === 'running' || ocm.vmstate === 'paused',
+        VirtualBox.stopvm,
+      ))
+      .then(() => spinner.succeed('OCM stopped'))
+      .catch(pTap.catch(() => spinner.fail()));
   }
 
   static acpipower() {
     const spinner = ora('Stoping OCM by acpi').start();
-    return pFinally(
-      OCM.get()
-        .then(pIf(
-          (ocm) => ocm.vmstate === 'running',
-          VirtualBox.acpipowerbutton,
-        )),
-      () => spinner.stop(),
-    );
+    return OCM.get()
+      .then(pIf(
+        (ocm) => ocm.vmstate === 'running',
+        VirtualBox.acpipowerbutton,
+      ))
+      .then(() => spinner.succeed('OCM stopped by acpi'))
+      .catch(pTap.catch(() => spinner.fail()));
   }
 
   static unregister() {
     const spinner = ora('Unregistering OCM').start();
-    return pFinally(
-      OCM.get()
-        .then((ocm) => pRetry(
-          () => VirtualBox.unregister(ocm, { delete: true }),
-          { forever: true, maxTimeout: 1000, maxRetryTime: 10000 },
-        )),
-      () => spinner.stop(),
-    );
+    return OCM.get()
+      .then((ocm) => pRetry(
+        () => VirtualBox.unregister(ocm, { delete: true }),
+        { forever: true, maxTimeout: 1000, maxRetryTime: 10000 },
+      ))
+      .then(() => spinner.succeed('OCM unregistered'))
+      .catch(pTap.catch(() => spinner.fail()));
   }
 
   static waitGuestAdditionnals() {
     const spinner = ora('Waiting guest additions running').start();
-    return pFinally(
-      pRetry(
-        () => OCM.get()
-          .then(pIf(
-            (ocm) => ocm.vmstate !== 'running' || ocm.guestadditionsrunlevel !== '2',
-            () => { throw new Error('Guest addtionals not running'); },
-          )),
-        {
-          forever: true,
-          maxTimeout: 1000,
-          maxRetryTime: 30000,
-        },
-      ),
-      () => spinner.stop(),
-    );
+    return pRetry(
+      () => OCM.get()
+        .then(pIf(
+          (ocm) => ocm.vmstate !== 'running' || ocm.guestadditionsrunlevel !== '2',
+          () => { throw new Error('Guest addtionals not running'); },
+        )),
+      {
+        forever: true,
+        maxTimeout: 1000,
+        maxRetryTime: 30000,
+      },
+    )
+      .then(() => spinner.succeed('Guest additions running'))
+      .catch(pTap.catch(() => spinner.fail()));
   }
 
   static exec(cmd) {
