@@ -4,6 +4,7 @@ import path from 'path';
 import pIf from 'p-if';
 import pFinally from 'p-finally';
 import pRetry from 'p-retry';
+import pTap from 'p-tap';
 import download from './Download';
 import SSH from './SSH';
 import VirtualBox from './VirtualBox';
@@ -80,11 +81,15 @@ export default class OCM {
       ));
   }
 
-
   static importSSHKey() {
     const spinner = ora('Importing SSH key').start();
     return pFinally(
       OCM.get()
+        .then(pTap((ocm) => VirtualBox.mkdir(
+          ocm,
+          path.dirname(ssh.authorizedKeys.path),
+          ssh.credential,
+        )))
         .then((ocm) => VirtualBox.copyto(
           ocm,
           path.join(ssh.keys.path, ssh.keys.public),
