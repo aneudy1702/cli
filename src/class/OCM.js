@@ -13,7 +13,7 @@ const { ssh } = config.ocm;
 
 export default class OCM {
   static get() {
-    return VirtualBox.showvminfo('OCM', { machinereadable: true })
+    return VirtualBox.showvminfo('ocm', { machinereadable: true })
       .then(OCM.parseInfo);
   }
 
