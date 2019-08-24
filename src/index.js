@@ -21,7 +21,7 @@ if (input.length > 0) {
     case 'b':
       OCM.exec(`sudo ${bin} ${args}`);
       break;
-    case 'ssh':
+    case 'shell':
       log('/!\\ Exprerimental /!\\\n');
       OCM.shell();
       break;
