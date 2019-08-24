@@ -39,9 +39,14 @@ export default class VirtualBox {
     return pExec(`VBoxManage controlvm ${vm.uuid || vm.name || vm} resume`);
   }
 
+  static mkdir(vm, dest, options = {}) {
+    const args = getArgs(options);
+    return pExec(`VBoxManage guestcontrol ${vm.uuid || vm.name || vm} mkdir ${args} "${dest}"`);
+  }
+
   static copyto(vm, src, dest, options = {}) {
     const args = getArgs(options);
-    return pExec(`VBoxManage guestcontrol ${vm.uuid || vm.name || vm} copyto ${args} ${src} ${dest}`);
+    return pExec(`VBoxManage guestcontrol ${vm.uuid || vm.name || vm} copyto ${args} "${src}" "${dest}"`);
   }
 
   static unregister(vm, options = {}) {
