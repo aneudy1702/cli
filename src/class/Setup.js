@@ -1,8 +1,11 @@
 import inquirer from 'inquirer';
+import fs from 'fs-extra';
+import path from 'path';
 import pIf from 'p-if';
 import pSettle from 'p-settle';
 import pTap from 'p-tap';
 import OCM from './OCM';
+import config from '../config';
 
 export default class Setup {
   static install() {
@@ -12,9 +15,12 @@ export default class Setup {
     ])
       .then(Setup.ask)
       .then(pTap(pIf((answers) => answers.deleteOCM === false, Setup.exit)))
-      .then(pTap(pIf((answers) => answers.deleteOCM === true, OCM.delete)))
-      .then(pIf((answers) => answers.keepOCMSSHKeys !== true, OCM.generateSSHKeys))
-      .then(OCM.download)
+      .then(pTap(pIf((answers) => answers.userCache !== true, OCM.delete)))
+      .then(pTap(pIf((answers) => answers.generateOCMSSHKeys === true, OCM.generateSSHKeys)))
+      .then(pIf(
+        (answers) => answers.useCache !== true, OCM.download,
+        () => path.join(config.ocm.download.path, config.ocm.download.file),
+      ))
       .then(OCM.import)
       .then(OCM.start)
       .then(OCM.waitGuestAdditionnals)
@@ -27,25 +33,32 @@ export default class Setup {
     checks.forEach((check, i) => {
       switch (i) {
         case 0:
-          if (check.isFulfilled) {
-            questions.push({
-              type: 'confirm',
-              name: 'deleteOCM',
-              default: false,
-              message: 'OCM already installed, would you reinstall ?',
-            });
-          }
+          questions.push({
+            type: 'confirm',
+            name: 'deleteOCM',
+            default: false,
+            message: 'OCM already installed, do you want to reinstall ?',
+            when: () => check.isFulfilled,
+          });
+          questions.push({
+            type: 'confirm',
+            name: 'useCache',
+            default: true,
+            message: 'OCM already downloaded, do you want to use cache ?',
+            when: (answers) => answers.deleteOCM !== false && fs.existsSync(path.join(
+              config.ocm.download.path,
+              config.ocm.download.file,
+            )),
+          });
           break;
         case 1:
-          if (check.isFulfilled && check.value) {
-            questions.push({
-              type: 'confirm',
-              name: 'keepOCMSSHKeys',
-              default: true,
-              message: 'OCM SSH keys found, would you keep them ?',
-              when: (answers) => answers.deleteOCM !== false,
-            });
-          }
+          questions.push({
+            type: 'confirm',
+            name: 'generateOCMSSHKeys',
+            default: true,
+            message: 'OCM SSH keys exists, do you want to use them ?',
+            when: (answers) => answers.deleteOCM !== false && check.isFulfilled && check.value,
+          });
           break;
         default:
           break;
