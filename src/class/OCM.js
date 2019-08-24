@@ -1,3 +1,5 @@
+import boxen from 'boxen';
+import chalk from 'chalk';
 import fs from 'fs-extra';
 import ora from 'ora';
 import path from 'path';
@@ -31,6 +33,24 @@ export default class OCM {
       }
       return acc;
     }, {});
+  }
+
+  static status() {
+    const spinner = ora();
+    return OCM.get()
+      .then(pTap(pIf(
+        (ocm) => ocm.vmstate === 'running' && ocm.guestadditionsrunlevel === '2',
+        () => spinner.succeed('OCM running'),
+      )))
+      .then(pTap(pIf(
+        (ocm) => ocm.vmstate === 'running' && ocm.guestadditionsrunlevel !== '2',
+        () => spinner.warn('OCM starting'),
+      )))
+      .then(pTap(pIf(
+        (ocm) => ocm.vmstate !== 'running',
+        () => spinner.fail('OCM stopped'),
+      )))
+      .catch(pTap.catch(() => spinner.fail('OCM not installed')));
   }
 
   static delete() {
@@ -185,12 +205,34 @@ export default class OCM {
   }
 
   static exec(cmd) {
+    const spinner = ora('Connecting to OCM');
+    const timeout = setTimeout(() => spinner.start(), 200);
+    const clear = () => { clearTimeout(timeout); spinner.stop(); };
+
     return fs.readFile(path.join(ssh.keys.path, ssh.keys.private))
-      .then((privateKey) => SSH.exec(cmd, privateKey));
+      .then((privateKey) => SSH.exec(cmd, privateKey, { ready: clear }))
+      .catch((err) => { clear(); spinner.fail(err.message); });
   }
 
   static shell() {
+    const spinner = ora('Connecting to OCM');
+    const timeout = setTimeout(() => spinner.start(), 200);
+    const clear = () => { clearTimeout(timeout); spinner.stop(); };
+    const ready = () => {
+      clear();
+
+      const { error } = console;
+      error(boxen(chalk.cyan('Experimental feature'), {
+        padding: 1,
+        margin: 1,
+        align: 'center',
+        borderColor: 'yellow',
+        borderStyle: 'round'
+      }));
+    };
+
     return fs.readFile(path.join(ssh.keys.path, ssh.keys.private))
-      .then((privateKey) => SSH.shell(privateKey));
+      .then((privateKey) => SSH.shell(privateKey, { ready }))
+      .catch((err) => { clear(); spinner.fail(err.message); });
   }
 }

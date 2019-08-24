@@ -14,6 +14,9 @@ if (input.length > 0) {
       Setup.install()
         .catch((err) => error(err.message));
       break;
+    case 'status':
+      OCM.status();
+      break;
     case 'podman':
     case 'pod':
     case 'p':
@@ -22,7 +25,6 @@ if (input.length > 0) {
       OCM.exec(`sudo ${bin} ${args}`);
       break;
     case 'shell':
-      log('/!\\ Exprerimental /!\\\n');
       OCM.shell();
       break;
     case 'start':

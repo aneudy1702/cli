@@ -50,12 +50,17 @@ export default class SSH {
       const { stdin, stdout, stderr } = { ...defaultOptions, ...options };
 
       client.on('ready', () => {
+        if (typeof options.ready === 'function') {
+          options.ready();
+        }
+
         exec(cmd)
           .then((stream) => {
             stdin.on('data', (data) => { stream.write(data); });
             stream.on('data', (data) => { stdout.write(data); });
             stream.stderr.on('data', (data) => { stderr.write(data); });
             stream.on('close', () => { stdin.destroy(); client.end(); });
+            stream.on('error', (err) => { reject(err) });
           })
           .catch((err) => reject(err));
       });
@@ -72,7 +77,7 @@ export default class SSH {
     });
   }
 
-  static shell(privateKey, options = {}) {
+  static shell(privateKey, options = { debug: console.error}) {
     return new Promise((resolve, reject) => {
       const client = new Client();
       const shell = pify(client.shell.bind(client));
@@ -84,12 +89,17 @@ export default class SSH {
       const { stdin, stdout, stderr } = { ...defaultOptions, ...options };
 
       client.on('ready', () => {
+        if (typeof options.ready === 'function') {
+          options.ready();
+        }
+
         shell()
           .then((stream) => {
             stdin.on('data', (data) => { stream.write(data); });
             stream.on('data', (data) => { stdout.write(data); });
             stream.stderr.on('data', (data) => { stderr.write(data); });
             stream.on('close', () => { stdin.destroy(); client.end(); });
+            stream.on('error', (err) => { reject(err) });
           })
           .catch((err) => reject(err));
       });
