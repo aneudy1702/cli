@@ -15,8 +15,8 @@ export default class Setup {
     ])
       .then(Setup.ask)
       .then(pTap(pIf((answers) => answers.deleteOCM === false, Setup.exit)))
-      .then(pTap(pIf((answers) => answers.userCache !== true, OCM.delete)))
-      .then(pTap(pIf((answers) => answers.generateOCMSSHKeys === true, OCM.generateSSHKeys)))
+      .then(pTap(pIf((answers) => answers.deleteOCM === true, OCM.delete)))
+      .then(pTap(pIf((answers) => answers.keepOCMSSHKeys !== true, OCM.generateSSHKeys)))
       .then(pIf(
         (answers) => answers.useCache !== true, OCM.download,
         () => path.join(config.ocm.download.path, config.ocm.download.file),
@@ -54,7 +54,7 @@ export default class Setup {
         case 1:
           questions.push({
             type: 'confirm',
-            name: 'generateOCMSSHKeys',
+            name: 'keepOCMSSHKeys',
             default: true,
             message: 'OCM SSH keys exists, do you want to use them ?',
             when: (answers) => answers.deleteOCM !== false && check.isFulfilled && check.value,
