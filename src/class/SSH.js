@@ -60,7 +60,7 @@ export default class SSH {
             stream.on('data', (data) => { stdout.write(data); });
             stream.stderr.on('data', (data) => { stderr.write(data); });
             stream.on('close', () => { stdin.destroy(); client.end(); });
-            stream.on('error', (err) => { reject(err) });
+            stream.on('error', (err) => { reject(err); });
           })
           .catch((err) => reject(err));
       });
@@ -77,7 +77,7 @@ export default class SSH {
     });
   }
 
-  static shell(privateKey, options = { debug: console.error}) {
+  static shell(privateKey, options = {}) {
     return new Promise((resolve, reject) => {
       const client = new Client();
       const shell = pify(client.shell.bind(client));
@@ -99,7 +99,7 @@ export default class SSH {
             stream.on('data', (data) => { stdout.write(data); });
             stream.stderr.on('data', (data) => { stderr.write(data); });
             stream.on('close', () => { stdin.destroy(); client.end(); });
-            stream.on('error', (err) => { reject(err) });
+            stream.on('error', (err) => { reject(err); });
           })
           .catch((err) => reject(err));
       });

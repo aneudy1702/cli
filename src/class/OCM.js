@@ -227,7 +227,7 @@ export default class OCM {
         margin: 1,
         align: 'center',
         borderColor: 'yellow',
-        borderStyle: 'round'
+        borderStyle: 'round',
       }));
     };
 
