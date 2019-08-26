@@ -1,3 +1,7 @@
+#!/usr/bin/env node
+
+import pIf from 'p-if';
+import pSettle from 'p-settle';
 import OCM from './class/OCM';
 import Setup from './class/Setup';
 
@@ -6,9 +10,6 @@ const { log, error } = console;
 const input = process.argv.slice(2);
 
 if (input.length > 0) {
-  const bin = input[0][0] === 'p' ? 'podman' : 'buildah';
-  const args = input.slice(1).join(' ');
-
   switch (input[0]) {
     case 'install':
       Setup.install()
@@ -17,22 +18,17 @@ if (input.length > 0) {
     case 'status':
       OCM.status();
       break;
-    case 'podman':
-    case 'pod':
-    case 'p':
-    case 'buildah':
-    case 'b':
-      OCM.exec(`sudo ${bin} ${args}`);
-      break;
     case 'shell':
       OCM.shell();
       break;
     case 'start':
       OCM.start()
-        .then(OCM.waitGuestAdditionnals);
+        .then(OCM.waitGuestAdditionnals)
+        .catch((err) => error(err.message));
       break;
     case 'stop':
-      OCM.acpipower();
+      OCM.acpipower()
+        .catch((err) => error(err.message));
       break;
     default:
       break;

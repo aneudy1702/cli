@@ -4,8 +4,11 @@
   "repository": "git@github.com:adeo/open-containers-manager.git",
   "author": "Tony DUBURQUE <tony.duburque@leroymerlin.fr>",
   "license": "MIT",
+  "main": "dist/index.js",
   "bin": {
-    "ocm": "./dist/index.js"
+    "ocm": "./dist/index.js",
+    "podman": "./dist/podman.js",
+    "buildah": "./dist/buildah.js"
   },
   "scripts": {
     "build": "babel src --out-dir dist",
@@ -23,7 +26,6 @@
     "got": "^9.6.0",
     "inquirer": "^6.5.1",
     "node-forge": "^0.8.5",
-    "nodegit": "^0.25.1",
     "numeral": "^2.0.6",
     "ora": "^3.4.0",
     "p-all": "^2.1.0",
