@@ -204,6 +204,22 @@ export default class OCM {
       .catch(pTap.catch(() => spinner.fail()));
   }
 
+  static forward(port) {
+    const spinner = ora(`Creating forwarding tcp/${port}`).start();
+    return OCM.get()
+      .then((ocm) => VirtualBox.forward(ocm, 1, `tcp_${port}_${port}`, 'tcp', '', port, '', port))
+      .then(() => spinner.succeed(`Forward tcp/${port} created`))
+      .catch(pTap.catch(() => spinner.fail()));
+  }
+
+  static unforward(port) {
+    const spinner = ora(`Deleting forwarding tcp/${port}`).start();
+    return OCM.get()
+      .then((ocm) => VirtualBox.unforward(ocm, 1, `tcp_${port}_${port}`))
+      .then(() => spinner.succeed(`Forward tcp/${port} deleted`))
+      .catch(pTap.catch(() => spinner.fail()));
+  }
+
   static exec(cmd) {
     const spinner = ora('Connecting to OCM');
     const timeout = setTimeout(() => spinner.start(), 200);
