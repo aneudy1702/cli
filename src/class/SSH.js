@@ -54,11 +54,13 @@ export default class SSH {
           options.ready();
         }
 
-        exec(cmd)
+        exec(cmd, { pty: true })
           .then((stream) => {
-            stdin.on('data', (data) => { stream.write(data); });
-            stream.on('data', (data) => { stdout.write(data); });
-            stream.stderr.on('data', (data) => { stderr.write(data); });
+            stdin.setRawMode(true);
+            stdin.pipe(stream);
+            stream.pipe(stdout);
+            stream.stderr.pipe(stderr);
+
             stream.on('close', () => { stdin.destroy(); client.end(); });
             stream.on('error', (err) => { reject(err); });
           })
