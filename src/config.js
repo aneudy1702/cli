@@ -34,4 +34,7 @@ export default {
       },
     },
   },
+  vboxmanage: {
+    bin: path.join(process.env.VBOX_MSI_INSTALL_PATH, 'VBoxManage') || 'VBoxManage',
+  },
 };

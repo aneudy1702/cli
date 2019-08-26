@@ -1,11 +1,9 @@
 #!/usr/bin/env node
 
-import pIf from 'p-if';
-import pSettle from 'p-settle';
 import OCM from './class/OCM';
 import Setup from './class/Setup';
 
-const { log, error } = console;
+const { error } = console;
 
 const input = process.argv.slice(2);
 
