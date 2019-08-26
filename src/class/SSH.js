@@ -93,12 +93,14 @@ export default class SSH {
           options.ready();
         }
 
-        shell()
+        shell({ pty: true })
           .then((stream) => {
-            stdin.on('data', (data) => { stream.write(data); });
-            stream.on('data', (data) => { stdout.write(data); });
-            stream.stderr.on('data', (data) => { stderr.write(data); });
-            stream.on('close', () => { stdin.destroy(); client.end(); });
+            stdin.setRawMode(true);
+            stdin.pipe(stream);
+            stream.pipe(stdout);
+            stream.stderr.pipe(stderr);
+
+            stream.on('close', () => { stdin.unref(); client.end(); });
             stream.on('error', (err) => { reject(err); });
           })
           .catch((err) => reject(err));
