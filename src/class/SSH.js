@@ -54,8 +54,14 @@ export default class SSH {
           options.ready();
         }
 
-        exec(cmd, { pty: true })
+        exec(cmd, { pty: stdout.isTTY ? { rows: stdout.rows, columns: stdout.columns } : true })
           .then((stream) => {
+            if (stdout.isTTY) {
+              const resize = () => { stream.setWindow(stdout.rows, stdout.columns); };
+              resize();
+              stdout.on('resize', resize);
+            }
+
             stdin.setRawMode(true);
             stdin.pipe(stream);
             stream.pipe(stdout);
@@ -95,8 +101,14 @@ export default class SSH {
           options.ready();
         }
 
-        shell({ pty: true })
+        shell({ pty: stdout.isTTY ? { rows: stdout.rows, columns: stdout.columns } : true })
           .then((stream) => {
+            if (stdout.isTTY) {
+              const resize = () => { stream.setWindow(stdout.rows, stdout.columns); };
+              resize();
+              stdout.on('resize', resize);
+            }
+
             stdin.setRawMode(true);
             stdin.pipe(stream);
             stream.pipe(stdout);
