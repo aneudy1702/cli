@@ -73,7 +73,7 @@ ipc.serve(() => {
       ipc.server.on('connect', (socket) => { ipc.server.emit(socket, 'ready'); });
       ipc.server.on('exec', remote);
     })
-    .catch((err) => { stop(); disconnect(); });
+    .catch(() => { stop(); disconnect(); });
 });
 
 ipc.server.start();
