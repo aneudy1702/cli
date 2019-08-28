@@ -18,7 +18,7 @@ client.on('error', (err) => {
     retried = true;
     Daemon.start({ interval: 100, timeout: 2000 })
       .then(() => exec(command))
-      .catch(fail);
+      .catch(() => fail(err));
   } else {
     fail(err);
   }
