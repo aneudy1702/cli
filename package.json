@@ -13,9 +13,7 @@
   },
   "scripts": {
     "build": "babel src --out-dir bin",
-    "clean": "rm -rf bin",
     "dev": "nodemon --watch src -e js --exec yarn lint",
-    "deploy": "yarn global add file:$PWD",
     "lint": "eslint src/*.js src/**/*.js",
     "serve": "nodemon --watch src -e js --exec babel-node src/index.js"
   },
