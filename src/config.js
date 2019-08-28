@@ -37,7 +37,7 @@ export default {
       daemon: {
         path: process.env.DEAMON_PATH || resolveGlobal
           .silent(app.name)
-          .replace(app.main, app.daemon),
+          .replace('index.js', 'daemon.js'),
       },
     },
   },
