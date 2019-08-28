@@ -38,6 +38,11 @@ export default class SSH {
       });
   }
 
+  static status() {
+    const client = new Client();
+    return client.status();
+  }
+
   static start(options = {}) {
     return Daemon.start(options);
   }
@@ -50,9 +55,5 @@ export default class SSH {
         client.on('end', () => { resolve(); });
         client.on('error', (error) => { reject(error); });
       }));
-  }
-
-  static shell(options = {}) {
-    return SSH.exec(null, options);
   }
 }

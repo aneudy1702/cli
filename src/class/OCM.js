@@ -37,6 +37,7 @@ export default class OCM {
 
   static status() {
     const spinner = ora();
+    const sshSpinner = ora();
     return OCM.get()
       .then(pTap(pIf(
         (ocm) => ocm.vmstate === 'running' && ocm.guestadditionsrunlevel === '2',
@@ -50,6 +51,16 @@ export default class OCM {
         (ocm) => ocm.vmstate !== 'running',
         () => spinner.fail('OCM stopped'),
       )))
+      .then(SSH.status)
+      .then(pIf(
+        (state) => state === 'running',
+        () => sshSpinner.succeed('SSH daemon running'),
+        pIf(
+          (state) => state === 'no-ssh',
+          () => sshSpinner.warn('SSH daemon not ready'),
+          () => sshSpinner.fail('SSH daemon stopped'),
+        )
+      ))
       .catch(pTap.catch(() => spinner.fail('OCM not installed')));
   }
 
@@ -131,28 +142,6 @@ export default class OCM {
       .catch(pTap.catch(() => spinner.fail()));
   }
 
-  static pause() {
-    const spinner = ora('Pausing OCM').start();
-    return OCM.get()
-      .then(pIf(
-        (ocm) => ocm.vmstate === 'running',
-        VirtualBox.pause,
-      ))
-      .then(() => spinner.succeed('OCM paused'))
-      .catch(pTap.catch(() => spinner.fail()));
-  }
-
-  static resume() {
-    const spinner = ora('Resuming OCM').start();
-    return OCM.get()
-      .then(pIf(
-        (ocm) => ocm.vmstate !== 'running',
-        VirtualBox.resume,
-      ))
-      .then(() => spinner.succeed('OCM resumed'))
-      .catch(pTap.catch(() => spinner.fail()));
-  }
-
   static stop() {
     const spinner = ora('Stoping OCM').start();
     return OCM.get()
@@ -211,32 +200,7 @@ export default class OCM {
       .catch(pTap.catch(() => spinner.fail()));
   }
 
-  static forward(port) {
-    const spinner = ora(`Creating forwarding tcp/${port}`).start();
-    return OCM.get()
-      .then((ocm) => VirtualBox.forward(ocm, 1, `tcp_${port}_${port}`, 'tcp', '', port, '', port))
-      .then(() => spinner.succeed(`Forward tcp/${port} created`))
-      .catch(pTap.catch(() => spinner.fail()));
-  }
-
-  static unforward(port) {
-    const spinner = ora(`Deleting forwarding tcp/${port}`).start();
-    return OCM.get()
-      .then((ocm) => VirtualBox.unforward(ocm, 1, `tcp_${port}_${port}`))
-      .then(() => spinner.succeed(`Forward tcp/${port} deleted`))
-      .catch(pTap.catch(() => spinner.fail()));
-  }
-
   static exec(cmd) {
-    const spinner = ora('Connecting to OCM');
-    const timeout = setTimeout(() => spinner.start(), 200);
-    const clear = () => { clearTimeout(timeout); spinner.stop(); };
-
-    return SSH.exec(cmd, { interval: 100, timeout: 2000, ready: clear })
-      .catch((err) => { clear(); spinner.fail(err.message); });
-  }
-
-  static shell() {
     const spinner = ora('Connecting to OCM');
     const timeout = setTimeout(() => spinner.start(), 200);
     const clear = () => { clearTimeout(timeout); spinner.stop(); };
@@ -244,6 +208,7 @@ export default class OCM {
       clear();
 
       const { error } = console;
+
       error(boxen(chalk.cyan('Experimental feature'), {
         padding: 1,
         margin: 1,
@@ -253,7 +218,11 @@ export default class OCM {
       }));
     };
 
-    return SSH.shell({ interval: 100, timeout: 2000, ready })
+    return SSH.exec(cmd, { interval: 100, timeout: 2000, ready: cmd ? clear : ready })
       .catch((err) => { clear(); spinner.fail(err.message); });
+  }
+
+  static shell() {
+    return OCM.exec();
   }
 }
