@@ -59,7 +59,7 @@ export default class OCM {
           (state) => state === 'no-ssh',
           () => sshSpinner.warn('SSH daemon not ready'),
           () => sshSpinner.fail('SSH daemon stopped'),
-        )
+        ),
       ))
       .catch(pTap.catch(() => spinner.fail('OCM not installed')));
   }
