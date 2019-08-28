@@ -1,6 +1,6 @@
 import os from 'os';
 import path from 'path';
-import resolveGlobal from 'resolve-global';
+import resolveGlobal from './class/ResolveGlobal';
 import app from '../package.json';
 
 export default {
