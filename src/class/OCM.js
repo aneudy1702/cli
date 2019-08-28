@@ -204,6 +204,13 @@ export default class OCM {
       .catch(pTap.catch(() => spinner.fail()));
   }
 
+  static startSSHDaemon() {
+    const spinner = ora('Starting OCM SSH daemon').start();
+    return SSH.start({ interval: 100, timeout: 60000 })
+      .then(() => spinner.succeed('OCM SSH daemon running'))
+      .catch(pTap.catch(() => spinner.fail()));
+  }
+
   static forward(port) {
     const spinner = ora(`Creating forwarding tcp/${port}`).start();
     return OCM.get()
@@ -225,8 +232,7 @@ export default class OCM {
     const timeout = setTimeout(() => spinner.start(), 200);
     const clear = () => { clearTimeout(timeout); spinner.stop(); };
 
-    return fs.readFile(path.join(ssh.keys.path, ssh.keys.private))
-      .then((privateKey) => SSH.exec(cmd, privateKey, { ready: clear }))
+    return SSH.exec(cmd, { interval: 100, timeout: 2000, ready: clear })
       .catch((err) => { clear(); spinner.fail(err.message); });
   }
 
@@ -247,8 +253,7 @@ export default class OCM {
       }));
     };
 
-    return fs.readFile(path.join(ssh.keys.path, ssh.keys.private))
-      .then((privateKey) => SSH.shell(privateKey, { ready }))
+    return SSH.shell({ interval: 100, timeout: 2000, ready })
       .catch((err) => { clear(); spinner.fail(err.message); });
   }
 }

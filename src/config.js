@@ -1,5 +1,7 @@
 import os from 'os';
 import path from 'path';
+import resolveGlobal from 'resolve-global';
+import app from '../package.json';
 
 export default {
   ocm: {
@@ -31,6 +33,11 @@ export default {
         path: path.join(os.homedir(), '.ssh'),
         public: 'ocm_rsa.pub',
         private: 'ocm_rsa',
+      },
+      daemon: {
+        path: process.env.DEAMON_PATH || resolveGlobal
+          .silent(app.name)
+          .replace(app.main, app.daemon),
       },
     },
   },

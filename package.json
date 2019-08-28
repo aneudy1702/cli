@@ -4,16 +4,19 @@
   "repository": "git@github.com:adeo/open-containers-manager.git",
   "author": "Tony DUBURQUE <tony.duburque@leroymerlin.fr>",
   "license": "MIT",
-  "main": "dist/index.js",
+  "main": "bin/index.js",
+  "daemon": "bin/daemon.js",
   "bin": {
-    "ocm": "./dist/index.js",
-    "podman": "./dist/podman.js",
-    "buildah": "./dist/buildah.js"
+    "ocm": "./bin/index.js",
+    "podman": "./bin/podman.js",
+    "buildah": "./bin/buildah.js"
   },
   "scripts": {
-    "build": "babel src --out-dir dist",
+    "build": "babel src --out-dir bin",
+    "clean": "rm -rf bin",
     "dev": "nodemon --watch src -e js --exec yarn lint",
-    "lint": "eslint src/**/*.js",
+    "deploy": "yarn global add file:$PWD",
+    "lint": "eslint src/*.js src/**/*.js",
     "serve": "nodemon --watch src -e js --exec babel-node src/index.js"
   },
   "dependencies": {
@@ -26,6 +29,7 @@
     "got": "^9.6.0",
     "inquirer": "^6.5.1",
     "node-forge": "^0.8.5",
+    "node-ipc": "^9.1.1",
     "numeral": "^2.0.6",
     "ora": "^3.4.0",
     "p-all": "^2.1.0",
@@ -37,7 +41,9 @@
     "p-retry": "^4.1.0",
     "p-settle": "^3.1.0",
     "p-tap": "^3.1.0",
+    "p-wait-for": "^3.1.0",
     "pify": "^4.0.1",
+    "resolve-global": "^1.0.0",
     "speedometer": "^1.1.0",
     "ssh2": "^0.8.5"
   },

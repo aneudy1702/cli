@@ -1,11 +1,7 @@
 #!/usr/bin/env node
 
-import OCM from './class/OCM';
+import exec from './class/Cli';
 
-const { error } = console;
+const args = process.argv.slice(2).join(' ');
 
-const input = process.argv.slice(2);
-const args = input.join(' ');
-
-OCM.exec(`sudo buildah ${args}`)
-  .catch((err) => error(err.message));
+exec(`sudo buildah ${args}`);
