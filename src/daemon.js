@@ -10,8 +10,11 @@ const ssh = new SSHConnection(config.ocm.ssh);
 
 ipc.config.appspace = 'ocm.';
 ipc.config.id = 'daemon';
-ipc.config.silent = true;
+// ipc.config.silent = true;
 
+const noSSH = (socket) => { ipc.server.emit(socket, 'no-ssh'); };
+const stop = () => { ipc.server.stop(); };
+const disconnect = () => { ssh.disconnect(); };
 const remote = (data, socket) => {
   const stdin = new PassThrough();
   const events = new EventEmitter();
@@ -52,17 +55,25 @@ const remote = (data, socket) => {
 };
 
 ipc.serve(() => {
-  ipc.server.on('connect', (socket) => { ipc.server.emit(socket, 'ready'); });
-  ipc.server.on('exec', remote);
-  ipc.server.on('stop', () => { ssh.disconnect(); });
+  ipc.server.on('stop', stop);
+  ipc.server.on('connect', noSSH);
+
+  pRetry(
+    () => ssh.connect(),
+    { forever: true, maxTimeout: 1000, maxRetryTime: config.ocm.ssh.daemon.timeout },
+  )
+    .then(() => {
+      ipc.server.off('connect', noSSH);
+
+      ipc.server.on('stop', disconnect); // External event
+      ssh.on('end', stop);
+
+      ipc.server.broadcast('ready');
+
+      ipc.server.on('connect', (socket) => { ipc.server.emit(socket, 'ready'); });
+      ipc.server.on('exec', remote);
+    })
+    .catch((err) => { stop(); disconnect(); });
 });
 
-pRetry(
-  () => ssh.connect(),
-  { forever: true, maxTimeout: 1000, maxRetryTime: 60000 },
-)
-  .then(() => {
-    ipc.server.start();
-    ssh.on('end', () => { ipc.server.stop(); });
-  })
-  .catch((err) => { console.error(err.stack); });
+ipc.server.start();

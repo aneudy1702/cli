@@ -12,6 +12,12 @@ export default class SSHDaemon {
       .then((state) => state === 'running');
   }
 
+  static isStopped() {
+    const client = new Client();
+    return client.status()
+      .then((state) => state === 'stopped');
+  }
+
   static start(options = {}) {
     const daemonBinPath = config.ocm.ssh.daemon.path;
 
@@ -19,9 +25,9 @@ export default class SSHDaemon {
       return Promise.reject(new Error('SSH daemon binary not found'));
     }
 
-    return SSHDaemon.isRunning()
+    return SSHDaemon.isStopped()
       .then(pIf(
-        (state) => !state,
+        (state) => state,
         () => {
           const exec = spawn('node', [daemonBinPath], {
             stdio: 'ignore',

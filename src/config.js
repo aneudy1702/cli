@@ -38,6 +38,7 @@ export default {
         path: process.env.DEAMON_PATH || resolveGlobal
           .silent(app.name)
           .replace('index.js', 'daemon.js'),
+        timeout: 60000,
       },
     },
   },

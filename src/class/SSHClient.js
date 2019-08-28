@@ -20,14 +20,19 @@ export default class SSHClient extends EventEmitter {
 
       client.connectTo('daemon', () => {
         client.of.daemon.on('ready', () => {
-          resolve('running');
           client.disconnect('daemon');
+          resolve('running');
+        });
+
+        client.of.daemon.on('no-ssh', () => {
+          client.disconnect('daemon');
+          resolve('no-ssh');
         });
       });
 
       client.of.daemon.on('error', () => {
-        resolve('stopped');
         client.disconnect('daemon');
+        resolve('stopped');
       });
     });
   }
@@ -83,9 +88,14 @@ export default class SSHClient extends EventEmitter {
       });
     });
 
+    client.of.daemon.on('no-ssh', () => {
+      client.disconnect('daemon');
+      this.emit('error', new Error('no ssh connection available from the daemon'));
+    });
+
     client.of.daemon.on('error', (err) => {
-      this.emit('error', err);
       client.disconnect('deamon');
+      this.emit('error', err);
     });
   }
 }
