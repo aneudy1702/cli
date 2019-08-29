@@ -52,7 +52,12 @@ export default class Daemon {
         ipc.server.on('exec', remote);
         ipc.server.on('forward-out', forward);
       })
-      .catch((err) => { console.error(err); stop(); ssh.disconnect(); });
+      .catch((err) => {
+        const { error } = console;
+        error(err);
+        stop();
+        ssh.disconnect();
+      });
   }
 
   remote(data, socket) {
