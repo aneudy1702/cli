@@ -5,11 +5,10 @@ import ipc from 'node-ipc';
 import net from 'net';
 import pRetry from 'p-retry';
 import { PassThrough } from 'stream';
-import SSHConnection from './class/SSHConnection';
-import SSHExec from './class/SSHExec';
+import { Connection, Exec } from './class/SSH';
 import config from './config';
 
-const ssh = new SSHConnection(config.ocm.ssh);
+const ssh = new Connection(config.ocm.ssh);
 
 ipc.config.appspace = 'ocm.';
 ipc.config.id = 'daemon';
@@ -21,7 +20,7 @@ const disconnect = () => { ssh.disconnect(); };
 const remote = (data, socket) => {
   const stdin = new PassThrough();
   const events = new EventEmitter();
-  const sshExec = new SSHExec(ssh.client);
+  const sshExec = new Exec(ssh.client);
   const exec = data || {};
 
   sshExec.exec(exec.cmd, exec.options, exec.window, { stdin, events });

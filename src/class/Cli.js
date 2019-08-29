@@ -1,6 +1,6 @@
 import ora from 'ora';
-import Client from './SSHClient';
-import Daemon from './SSHDaemon';
+import Client from './SSH/Client';
+import Daemon from './SSH/Daemon';
 
 const client = new Client();
 

@@ -4,7 +4,7 @@ import path from 'path';
 import pify from 'pify';
 import { Client } from 'ssh2';
 
-export default class SSHConnection extends EventEmitter {
+export default class Connection extends EventEmitter {
   constructor(opts) {
     super();
     this.config = opts;

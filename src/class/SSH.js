@@ -5,8 +5,17 @@ import pify from 'pify';
 import pAll from 'p-all';
 import os from 'os';
 import { generateKeyPair } from 'crypto';
-import Client from './SSHClient';
-import Daemon from './SSHDaemon';
+import Client from './SSH/Client';
+import Connection from './SSH/Connection';
+import Daemon from './SSH/Daemon';
+import Exec from './SSH/Exec';
+
+export {
+  Connection,
+  Client,
+  Daemon,
+  Exec,
+};
 
 export default class SSH {
   static existsKeys(keyName) {

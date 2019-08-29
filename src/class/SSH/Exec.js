@@ -2,7 +2,7 @@ import EventEmitter from 'events';
 import pify from 'pify';
 import pIf from 'p-if';
 
-export default class SSHExec extends EventEmitter {
+export default class Exec extends EventEmitter {
   constructor(conn) {
     super();
     this.conn = conn;

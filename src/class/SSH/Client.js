@@ -1,7 +1,7 @@
 import EventEmitter from 'events';
 import { IPC } from 'node-ipc';
 
-export default class SSHClient extends EventEmitter {
+export default class Client extends EventEmitter {
   constructor() {
     super();
 

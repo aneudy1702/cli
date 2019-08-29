@@ -1,10 +1,10 @@
 import { spawn } from 'child_process';
 import pIf from 'p-if';
 import pWaitFor from 'p-wait-for';
-import Client from './SSHClient';
-import config from '../config';
+import { Client } from './Client';
+import config from '../../config';
 
-export default class SSHDaemon {
+export default class Daemon {
   static isRunning() {
     const client = new Client();
     return client.status()
