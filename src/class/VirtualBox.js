@@ -59,14 +59,4 @@ export default class VirtualBox {
     const args = getArgs(options);
     return pExec(`"${config.vboxmanage.bin}" import "${ovaFile}" ${args}`);
   }
-
-  static forward(vm, nic, name, proto, host, hostPort, internal, internalPort, options = {}) {
-    const args = getArgs(options);
-    return pExec(`"${config.vboxmanage.bin}" controlvm ${vm.uuid || vm.name || vm} natpf${nic} "${name},${proto},${host},${hostPort},${internal},${internalPort}" ${args}`);
-  }
-
-  static unforward(vm, nic, name, options = {}) {
-    const args = getArgs(options);
-    return pExec(`"${config.vboxmanage.bin}" controlvm ${vm.uuid || vm.name || vm} natpf${nic} delete "${name}" ${args}`);
-  }
 }
