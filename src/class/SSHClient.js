@@ -94,7 +94,37 @@ export default class SSHClient extends EventEmitter {
     });
 
     client.of.daemon.on('error', (err) => {
-      client.disconnect('deamon');
+      client.disconnect('daemon');
+      this.emit('error', err);
+    });
+  }
+
+  forward(port) {
+    const { client } = this;
+
+    client.connectTo('daemon', () => {
+      client.of.daemon.on('ready', () => {
+        client.of.daemon.emit('forward-out', { port });
+
+        client.of.daemon.on('forward-ready', () => {
+          this.emit('forward-ready');
+          client.disconnect('daemon');
+        });
+
+        client.of.daemon.on('end', () => {
+          this.emit('end');
+          client.disconnect('daemon');
+        });
+      });
+    });
+
+    client.of.daemon.on('no-ssh', () => {
+      client.disconnect('daemon');
+      this.emit('error', new Error('no ssh connection available from the daemon'));
+    });
+
+    client.of.daemon.on('error', (err) => {
+      client.disconnect('daemon');
       this.emit('error', err);
     });
   }

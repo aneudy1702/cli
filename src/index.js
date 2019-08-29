@@ -29,6 +29,10 @@ if (input.length > 0) {
       OCM.acpipower()
         .catch((err) => error(err.message));
       break;
+    case 'port':
+      OCM.forward(parseInt(input[1], 10))
+        .catch((err) => error(err));
+      break;
     default:
       break;
   }

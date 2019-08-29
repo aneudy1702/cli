@@ -1,6 +1,7 @@
 import EventEmitter from 'events';
 import fs from 'fs-extra';
 import path from 'path';
+import pify from 'pify';
 import { Client } from 'ssh2';
 
 export default class SSHConnection extends EventEmitter {
@@ -22,7 +23,7 @@ export default class SSHConnection extends EventEmitter {
           privateKey,
         });
 
-        this.client.on('ready', () => { resolve(); });
+        client.on('ready', () => { resolve(); });
         client.on('end', () => { this.emit('end'); });
         client.on('error', (err) => { reject(err); });
       }));
@@ -30,5 +31,11 @@ export default class SSHConnection extends EventEmitter {
 
   disconnect() {
     this.client.end();
+  }
+
+  forwardOut(host, hostPort, localhost, localPort) {
+    const { client } = this;
+    const forward = pify(client.forwardOut.bind(client));
+    return forward(host, hostPort, localhost, localPort);
   }
 }

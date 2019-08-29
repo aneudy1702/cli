@@ -1,5 +1,8 @@
+#!/usr/bin/env node
+
 import EventEmitter from 'events';
 import ipc from 'node-ipc';
+import net from 'net';
 import pRetry from 'p-retry';
 import { PassThrough } from 'stream';
 import SSHConnection from './class/SSHConnection';
@@ -53,6 +56,27 @@ const remote = (data, socket) => {
     ipc.server.emit(socket, 'err', err);
   });
 };
+const forwardOut = (data, socket) => {
+  const error = (err) => { ipc.server.emit(socket, 'error', err); };
+
+  ssh.forwardOut('0.0.0.0', data.port, '127.0.0.1', data.port)
+    .then((stream) => {
+      const server = net.createServer((client) => {
+        client.pipe(stream);
+        stream.pipe(client);
+      });
+
+      server.listen(data.port, () => {
+        ipc.server.emit(socket, 'forward-ready', data);
+
+        stream.on('end', () => { server.close(); });
+        stream.on('error', (err) => { server.close(); error(err); });
+      });
+
+      server.on('error', (err) => { stream.end(); error(err); });
+    })
+    .catch((err) => { error(err); });
+};
 
 ipc.serve(() => {
   ipc.server.on('stop', stop);
@@ -72,6 +96,7 @@ ipc.serve(() => {
 
       ipc.server.on('connect', (socket) => { ipc.server.emit(socket, 'ready'); });
       ipc.server.on('exec', remote);
+      ipc.server.on('forward-out', forwardOut);
     })
     .catch(() => { stop(); disconnect(); });
 });
