@@ -16,6 +16,8 @@ export default class Daemon {
     // ipc.config.silent = true;
     ipc.serve(() => this.serve());
     this.ipc = ipc;
+
+    this.forwardedPorts = [];
   }
 
   start() {
@@ -94,23 +96,28 @@ export default class Daemon {
     const { ipc, ssh } = this;
     const error = this.error.bind(this);
 
-    ssh.forwardOut('0.0.0.0', data.port, '127.0.0.1', data.port)
-      .then((stream) => {
-        const server = net.createServer((client) => {
-          client.pipe(stream);
-          stream.pipe(client);
-        });
+    if (this.forwardedPorts.includes(data.port)) {
+      ipc.server.emit(socket, 'forward-ready', data);
+    } else {
+      ssh.forwardOut('0.0.0.0', data.port, '127.0.0.1', data.port)
+        .then((stream) => {
+          const server = net.createServer((client) => {
+            client.pipe(stream);
+            stream.pipe(client);
+          });
 
-        server.listen(data.port, () => {
-          ipc.server.emit(socket, 'forward-ready', data);
+          server.listen(data.port, () => {
+            this.forwardedPorts.push(data.port);
+            ipc.server.emit(socket, 'forward-ready', data);
 
-          stream.on('end', () => { server.close(); });
-          stream.on('error', (err) => { server.close(); error(socket, err); });
-        });
+            stream.on('end', () => { server.close(); });
+            stream.on('error', (err) => { server.close(); error(socket, err); });
+          });
 
-        server.on('error', (err) => { stream.end(); error(socket, err); });
-      })
-      .catch((err) => { error(socket, err); });
+          server.on('error', (err) => { stream.end(); error(socket, err); });
+        })
+        .catch((err) => { error(socket, err); });
+    }
   }
 
   noSSH(socket) {

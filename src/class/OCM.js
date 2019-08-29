@@ -230,6 +230,6 @@ export default class OCM {
     const spinner = ora(`Forwarding tcp/${port}`).start();
     return SSH.forward(port)
       .then(() => spinner.succeed(`Port tcp/${port} forwarded`))
-      .catch(pTap.catch(() => spinner.fail()));
+      .catch(() => spinner.fail());
   }
 }
