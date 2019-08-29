@@ -57,6 +57,7 @@ export default class Daemon {
 
   remote(data, socket) {
     const { ipc, ssh } = this;
+    const error = this.error.bind(this);
     const stdin = new PassThrough();
     const events = new EventEmitter();
     const sshExec = new Exec(ssh.client);
@@ -81,11 +82,12 @@ export default class Daemon {
     sshExec.on('stdout', (output) => { ipc.server.emit(socket, 'stdout', output); });
     sshExec.on('stderr', (output) => { ipc.server.emit(socket, 'stderr', output); });
     sshExec.on('end', () => { ipc.server.emit(socket, 'end'); });
-    sshExec.on('error', (err) => { this.error(socket, err); });
+    sshExec.on('error', (err) => { error(socket, err); });
   }
 
   forward(data, socket) {
-    const { ipc, ssh, error } = this;
+    const { ipc, ssh } = this;
+    const error = this.error.bind(this);
 
     ssh.forwardOut('0.0.0.0', data.port, '127.0.0.1', data.port)
       .then((stream) => {
