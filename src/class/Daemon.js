@@ -115,6 +115,9 @@ export default class Daemon {
           });
 
           server.on('error', (err) => { stream.end(); error(socket, err); });
+          server.on('close', () => {
+            this.forwardedPorts = this.forwardedPorts.filter((port) => port !== data.port);
+          });
         })
         .catch((err) => { error(socket, err); });
     }
