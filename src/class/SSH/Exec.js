@@ -11,12 +11,13 @@ export default class Exec extends EventEmitter {
   exec(cmd, opts, window, streams) {
     const exec = pify(this.conn.exec.bind(this.conn));
     const shell = pify(this.conn.shell.bind(this.conn));
-    const pty = typeof opts.pty === 'object' ? opts.pty : window;
+    const options = opts || {};
+    const pty = typeof options.pty === 'object' ? options.pty : window;
 
     return pIf(
       cmd !== undefined && cmd !== null,
-      () => exec(cmd, opts),
-      () => shell(window, opts),
+      () => exec(cmd, options),
+      () => shell(window, options),
     )()
       .then((stream) => {
         if (streams && streams.stdin) {

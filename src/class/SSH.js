@@ -65,13 +65,4 @@ export default class SSH {
         client.on('error', (error) => { reject(error); });
       }));
   }
-
-  static forward(port) {
-    return new Promise((resolve, reject) => {
-      const client = new Client();
-      client.forward(port);
-      client.on('forward-ready', () => { resolve(); });
-      client.on('error', (err) => { reject(err); });
-    });
-  }
 }
