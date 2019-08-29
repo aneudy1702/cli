@@ -19,11 +19,11 @@ export default class Daemon {
   }
 
   start() {
-    return this.ipc.server.start();
+    this.ipc.server.start();
   }
 
   stop() {
-    return this.ipc.server.stop();
+    this.ipc.server.stop();
   }
 
   serve() {
