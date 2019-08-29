@@ -26,7 +26,7 @@ export default class Daemon {
         () => {
           const exec = spawn(daemonBin, {
             stdio: 'ignore',
-            detached: true,
+            shell: process.platform === 'win32',
             windowsHide: true,
           });
 
