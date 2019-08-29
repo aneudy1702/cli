@@ -1,7 +1,7 @@
 import { spawn } from 'child_process';
 import pIf from 'p-if';
 import pWaitFor from 'p-wait-for';
-import { Client } from './Client';
+import Client from './Client';
 import config from '../../config';
 
 export default class Daemon {
@@ -20,7 +20,7 @@ export default class Daemon {
   static start(options = {}) {
     const daemonBin = config.ocm.ssh.daemon.bin;
 
-    return SSHDaemon.isStopped()
+    return Daemon.isStopped()
       .then(pIf(
         (state) => state,
         () => {
@@ -33,10 +33,10 @@ export default class Daemon {
           exec.unref();
         },
       ))
-      .then(() => SSHDaemon.wait(options));
+      .then(() => Daemon.wait(options));
   }
 
   static wait(options = {}) {
-    return pWaitFor(SSHDaemon.isRunning, options);
+    return pWaitFor(Daemon.isRunning, options);
   }
 }
