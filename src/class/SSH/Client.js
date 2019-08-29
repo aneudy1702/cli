@@ -48,7 +48,7 @@ export default class Client extends EventEmitter {
 
         const { stdin, stdout, stderr } = process;
         const { rows, columns } = stdout;
-        const window = stdout.isTTY ? { rows, columns, term: process.env.TERM || 'vt100' } : null;
+        const window = stdout.isTTY ? { rows, columns, term: process.env.TERM || 'vt220' } : null;
 
         client.of.daemon.emit('exec', {
           cmd: cmd || null,
