@@ -15,7 +15,7 @@
   "scripts": {
     "build": "babel src --out-dir bin",
     "dev": "nodemon --watch src -e js --exec yarn lint",
-    "lint": "eslint src/*.js src/**/*.js",
+    "lint": "eslint src",
     "serve": "nodemon --watch src -e js --exec babel-node src/index.js"
   },
   "dependencies": {
