@@ -55,6 +55,16 @@ export default class VirtualBox {
     return pExec(`"${config.vboxmanage.bin}" unregistervm ${vm.uuid || vm.name || vm} ${args}`);
   }
 
+  static share(vm, options = {}) {
+    const args = getArgs(options);
+    return pExec(`"${config.vboxmanage.bin}" sharedfolder add ${vm.uuid || vm.name || vm} ${args}`);
+  }
+
+  static unshare(vm, options = {}) {
+    const args = getArgs(options);
+    return pExec(`"${config.vboxmanage.bin}" sharedfolder remove ${vm.uuid || vm.name || vm} ${args}`);
+  }
+
   static import(ovaFile, options = {}) {
     const args = getArgs(options);
     return pExec(`"${config.vboxmanage.bin}" import "${ovaFile}" ${args}`);
