@@ -1,5 +1,4 @@
 import { spawn } from 'child_process';
-import fs from 'fs-extra';
 import pIf from 'p-if';
 import pWaitFor from 'p-wait-for';
 import Client from './SSHClient';
@@ -19,17 +18,13 @@ export default class SSHDaemon {
   }
 
   static start(options = {}) {
-    const daemonBinPath = config.ocm.ssh.daemon.path;
-
-    if (!fs.pathExistsSync(daemonBinPath)) {
-      return Promise.reject(new Error('SSH daemon binary not found'));
-    }
+    const daemonBin = config.ocm.ssh.daemon.bin;
 
     return SSHDaemon.isStopped()
       .then(pIf(
         (state) => state,
         () => {
-          const exec = spawn('node', [daemonBinPath], {
+          const exec = spawn(daemonBin, {
             stdio: 'ignore',
             detached: true,
             windowsHide: true,

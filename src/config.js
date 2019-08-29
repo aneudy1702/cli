@@ -1,7 +1,5 @@
 import os from 'os';
 import path from 'path';
-import resolveGlobal from './class/ResolveGlobal';
-import app from '../package.json';
 
 export default {
   ocm: {
@@ -35,9 +33,7 @@ export default {
         private: 'ocm_rsa',
       },
       daemon: {
-        path: process.env.DEAMON_PATH || resolveGlobal
-          .silent(app.name)
-          .replace('index.js', 'daemon.js'),
+        bin: 'ocm-daemon',
         timeout: 60000,
       },
     },
