@@ -4,7 +4,7 @@ import net from 'net';
 import pRetry from 'p-retry';
 import { PassThrough } from 'stream';
 import { Connection, Exec } from './SSH';
-import { Monitoring } from './Daemon/Pod';
+import { Monitoring } from './Daemon/Container';
 import config from '../config';
 
 export default class Daemon {
