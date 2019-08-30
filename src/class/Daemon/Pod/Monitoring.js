@@ -13,7 +13,7 @@ export default class Monitoring extends EventEmitter {
 
   start() {
     if (this.monitoring === null) {
-      this.monitoring = setTimeout(this.detect.bind(this), 250);
+      this.monitoring = setTimeout(this.detect.bind(this), 0);
     }
   }
 
