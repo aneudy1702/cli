@@ -1,15 +1,9 @@
 import EventEmitter from 'events';
-import net from 'net';
 import pAll from 'p-all';
-import pEvent from 'p-event';
 import pIf from 'p-if';
-import pSettle from 'p-settle';
 import { PassThrough } from 'stream';
+import Forward from '../SSH/Forward';
 import { Exec } from '../../SSH';
-
-/**
- * TODO: check settled
- */
 
 export default class Monitoring extends EventEmitter {
   constructor(connection) {
@@ -17,6 +11,8 @@ export default class Monitoring extends EventEmitter {
     this.connection = connection;
     this.client = connection.client;
     this.internal = new EventEmitter();
+
+    this.forwards = [];
   }
 
   start() {
@@ -47,12 +43,8 @@ export default class Monitoring extends EventEmitter {
         .filter((container) => container.Status === 'stop')
         .map((container) => container.ID);
 
-      pIf(stop.length > 0, () => this.unforwards(stop))()
-        .then(pIf(
-          start.length > 0,
-          () => this.inspect(start)
-            .then(this.forwards.bind(this)),
-        ))
+      pIf(stop.length > 0, () => this.unforward(stop))()
+        .then(pIf(start.length > 0, () => this.forward(start)))
         .catch((err) => { this.emit('error', err); });
     });
 
@@ -79,8 +71,7 @@ export default class Monitoring extends EventEmitter {
       });
       ssh.on('error', (err) => { reject(err); });
     })
-      .then((container) => this.inspect(container))
-      .then(this.forwards.bind(this));
+      .then((container) => this.forward(container));
   }
 
   inspect(containers) {
@@ -103,75 +94,37 @@ export default class Monitoring extends EventEmitter {
     });
   }
 
-  forwards(containers) {
-    return pAll(containers.map((container) => () => this.forward(container)));
+  forward(containers) {
+    return this.inspect(containers)
+      .then((containersInfo) => pAll(
+        containersInfo.map((container) => () => {
+          const id = container.Id;
+          const ports = container.NetworkSettings.Ports.map((forward) => forward.hostPort);
+
+          return pAll(
+            ports.map((port) => () => {
+              const forward = new Forward(this.connection, port);
+
+              forward.on('close', () => {
+                this.emit('unforward', port);
+                this.forwards = this.forwards.filter((f) => f.id !== id);
+              });
+
+              return forward.start()
+                .then(() => { this.forwards.push({ id, port, stop: forward.stop.bind(forward) }); })
+                .then(() => { this.emit('forward', port); })
+                .catch((err) => { this.emit('error', err); });
+            }),
+          );
+        }),
+      ));
   }
 
-  forward(container) {
-    const id = container.Id;
-    const ports = container.NetworkSettings.Ports.map((forward) => forward.hostPort);
-
-    let listeningPorts = [];
-
-    this.internal.on('forwards-stop', (containerId) => {
-      if (id === containerId && listeningPorts.length === 0) {
-        this.internal.emit(`${id}-forwards-stopped`);
-      }
-    });
-
-    return pSettle(
-      ports.map((port) => {
-        this.internal.on(`${port}-forward-stopped`, () => {
-          listeningPorts = listeningPorts.filter((p) => p !== port);
-          if (listeningPorts.length === 0) {
-            this.internal.emit(`${id}-forwards-stopped`);
-          }
-        });
-
-        listeningPorts.push(port);
-        return this.forwardPort(id, port);
-      }),
+  unforward(containers) {
+    return pAll(
+      containers.map((id) => () => this.forwards
+        .filter((f) => f.id === id)
+        .map((forward) => forward.stop())),
     );
-  }
-
-  forwardPort(id, port) {
-    return new Promise((resolve, reject) => {
-      const { error } = console;
-
-      this.connection.forwardOut('0.0.0.0', port, '127.0.0.1', port)
-        .then((stream) => {
-          const server = net.createServer((client) => {
-            client.pipe(stream);
-            stream.pipe(client);
-          });
-
-          server.listen(port, () => {
-            this.internal.on('forwards-stop', (containerId) => {
-              if (id === containerId) {
-                // stream.end();
-                server.close();
-              }
-            });
-
-            stream.on('end', () => { server.close(); });
-            stream.on('error', (err) => { server.close(); error(err); });
-
-            resolve();
-          });
-
-          server.on('close', () => { this.internal.emit(`${port}-forward-stopped`); });
-          server.on('error', (err) => { stream.end(); reject(err); });
-        })
-        .catch((err) => { reject(err); });
-    });
-  }
-
-  unforwards(containers) {
-    return pAll(containers.map((container) => () => this.unforward(container)));
-  }
-
-  unforward(container) {
-    this.internal.emit('forwards-stop', container);
-    return pEvent(this.internal, `${container}-forwards-stopped`);
   }
 }
