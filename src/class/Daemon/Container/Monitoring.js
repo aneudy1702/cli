@@ -7,6 +7,10 @@ import pSettle from 'p-settle';
 import { PassThrough } from 'stream';
 import { Exec } from '../../SSH';
 
+/**
+ * TODO: check settled
+ */
+
 export default class Monitoring extends EventEmitter {
   constructor(connection) {
     super();

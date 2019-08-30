@@ -6,6 +6,10 @@ import { Connection, Exec } from './SSH';
 import { Monitoring } from './Daemon/Container';
 import config from '../config';
 
+/**
+ * TODO: exist on monitoring error
+ */
+
 export default class Daemon {
   constructor() {
     this.ssh = new Connection(config.ocm.ssh);
