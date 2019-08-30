@@ -1,10 +1,10 @@
 import { spawn } from 'child_process';
 import pIf from 'p-if';
 import pWaitFor from 'p-wait-for';
-import Client from './Client';
+import Client from '../Cli/IPC/Client';
 import config from '../../config';
 
-export default class Daemon {
+export default class Launcher {
   static isRunning() {
     const client = new Client();
     return client.status()
@@ -20,7 +20,7 @@ export default class Daemon {
   static start(options = {}) {
     const daemonBin = config.ocm.ssh.daemon.bin;
 
-    return Daemon.isStopped()
+    return Launcher.isStopped()
       .then(pIf(
         (state) => state,
         () => {
@@ -33,10 +33,10 @@ export default class Daemon {
           exec.unref();
         },
       ))
-      .then(() => Daemon.wait(options));
+      .then(() => Launcher.wait(options));
   }
 
   static wait(options = {}) {
-    return pWaitFor(Daemon.isRunning, options);
+    return pWaitFor(Launcher.isRunning, options);
   }
 }

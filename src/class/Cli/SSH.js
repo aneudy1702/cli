@@ -5,17 +5,10 @@ import pify from 'pify';
 import pAll from 'p-all';
 import os from 'os';
 import { generateKeyPair } from 'crypto';
-import Client from './SSH/Client';
-import Connection from './SSH/Connection';
-import Daemon from './SSH/Daemon';
-import Exec from './SSH/Exec';
+import Client from './IPC/Client';
+import Launcher from '../Daemon/Launcher';
 
-export {
-  Connection,
-  Client,
-  Daemon,
-  Exec,
-};
+export { Launcher };
 
 export default class SSH {
   static existsKeys(keyName) {
@@ -53,11 +46,11 @@ export default class SSH {
   }
 
   static start(options = {}) {
-    return Daemon.start(options);
+    return Launcher.start(options);
   }
 
   static exec(cmd, options = {}) {
-    return Daemon.start(options)
+    return Launcher.start(options)
       .then(() => new Promise((resolve, reject) => {
         const client = new Client();
         client.exec(cmd, options);

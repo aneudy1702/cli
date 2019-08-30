@@ -5,7 +5,7 @@ import pIf from 'p-if';
 import pSettle from 'p-settle';
 import pTap from 'p-tap';
 import OCM from './OCM';
-import config from '../config';
+import config from '../../config';
 
 export default class Setup {
   static install() {

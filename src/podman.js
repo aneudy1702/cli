@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
-import exec from './class/Cli';
+import Cli from './class/Cli';
 
 const args = process.argv.slice(2).join(' ');
-
-exec(`sudo podman ${args}`);
+const cli = new Cli();
+cli.exec(`sudo podman ${args}`);

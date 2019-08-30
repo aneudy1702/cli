@@ -2,8 +2,7 @@ import EventEmitter from 'events';
 import pAll from 'p-all';
 import pIf from 'p-if';
 import { PassThrough } from 'stream';
-import Forward from '../SSH/Forward';
-import { Exec } from '../../SSH';
+import { Exec, Forward } from '../SSH';
 
 export default class Monitoring extends EventEmitter {
   constructor(connection) {

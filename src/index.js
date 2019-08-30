@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
-import OCM from './class/OCM';
-import Setup from './class/Setup';
+import OCM from './class/Cli/OCM';
+import Setup from './class/Cli/Setup';
 
 const { error } = console;
 

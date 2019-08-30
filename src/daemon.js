@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import Daemon from './class/Daemon';
+import Server from './class/Daemon/Server';
 
-const daemon = new Daemon();
+const daemon = new Server();
 daemon.start();

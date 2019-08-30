@@ -10,7 +10,7 @@ import pTap from 'p-tap';
 import download from './Download';
 import SSH from './SSH';
 import VirtualBox from './VirtualBox';
-import config from '../config';
+import config from '../../config';
 
 const { ssh } = config.ocm;
 

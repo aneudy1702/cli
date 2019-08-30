@@ -3,8 +3,8 @@ import { IPC } from 'node-ipc';
 import pRetry from 'p-retry';
 import { PassThrough } from 'stream';
 import { Connection, Exec } from './SSH';
-import { Monitoring } from './Daemon/Container';
-import config from '../config';
+import { Monitoring } from './Container';
+import config from '../../config';
 
 /**
  * TODO: exist on monitoring error

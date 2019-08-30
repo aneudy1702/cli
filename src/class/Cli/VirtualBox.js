@@ -1,6 +1,6 @@
 import { exec } from 'child_process';
 import pify from 'pify';
-import config from '../config';
+import config from '../../config';
 
 const pExec = pify(exec);
 
