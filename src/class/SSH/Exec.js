@@ -28,16 +28,26 @@ export default class Exec extends EventEmitter {
           streams.events.on('resize', (tty) => {
             stream.setWindow(tty.rows, tty.columns);
           });
+          streams.events.on('stop', () => { stream.end(); });
         }
 
         if (pty) {
           stream.setWindow(pty.rows, pty.columns);
         }
 
-        stream.on('data', (output) => { this.emit('stdout', output); });
+        const outputs = [];
+        stream.on('data', (output) => {
+          this.emit('stdout', output);
+          if (streams && streams.returnOutput === true) {
+            outputs.push(output);
+          }
+        });
         stream.stderr.on('data', (output) => { this.emit('stderr', output); });
 
-        stream.on('end', () => { this.emit('end'); });
+        stream.on('end', () => {
+          const output = streams.returnOutput ? outputs.join('') : undefined;
+          this.emit('end', output);
+        });
         stream.on('error', (err) => { this.emit('error', err); });
       });
   }

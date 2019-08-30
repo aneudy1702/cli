@@ -1,6 +1,5 @@
 import EventEmitter from 'events';
 import { IPC } from 'node-ipc';
-import net from 'net';
 import pRetry from 'p-retry';
 import { PassThrough } from 'stream';
 import { Connection, Exec } from './SSH';
@@ -35,8 +34,7 @@ export default class Daemon {
     const noSSH = this.noSSH.bind(this);
     const stop = this.stop.bind(this);
     const remote = this.remote.bind(this);
-    const forwards = this.forwards.bind(this);
-    const monitoring = new Monitoring(ssh.client);
+    const monitoring = new Monitoring(ssh);
 
     ipc.server.on('connect', noSSH);
 
@@ -50,9 +48,9 @@ export default class Daemon {
         ipc.server.on('stop', () => { monitoring.stop(); ssh.disconnect(); });
         ssh.on('end', () => { monitoring.stop(); stop(); });
 
-        monitoring.start();
-        monitoring.on('forwards', forwards);
-
+        return monitoring.start();
+      })
+      .then(() => {
         ipc.server.broadcast('ready');
 
         ipc.server.on('connect', (socket) => { ipc.server.emit(socket, 'ready'); });
@@ -94,35 +92,6 @@ export default class Daemon {
     sshExec.on('stderr', (output) => { ipc.server.emit(socket, 'stderr', output); });
     sshExec.on('end', () => { ipc.server.emit(socket, 'end'); });
     sshExec.on('error', (err) => { error(socket, err); });
-  }
-
-  forwards(ports) {
-    const { error } = console;
-
-    ports.forEach((port) => {
-      this.ssh.forwardOut('0.0.0.0', port, '127.0.0.1', port)
-        .then((stream) => {
-          const server = net.createServer((client) => {
-            client.pipe(stream);
-            stream.pipe(client);
-          });
-
-          server.listen(port, () => {
-            this.forwardedPorts.push(port);
-
-            stream.on('end', () => { server.close(); });
-            stream.on('error', (err) => { server.close(); error(err); });
-          });
-
-          server.on('error', (err) => { stream.end(); error(err); });
-          server.on('close', () => {
-            this.forwardedPorts = this.forwardedPorts.filter(
-              (forwardedPort) => forwardedPort !== port,
-            );
-          });
-        })
-        .catch((err) => { error(err); });
-    });
   }
 
   noSSH(socket) {
