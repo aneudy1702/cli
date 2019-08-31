@@ -8,6 +8,9 @@ import { generateKeyPair } from 'crypto';
 import Client from './IPC/Client';
 import Launcher from '../Daemon/Launcher';
 
+/**
+ * TODO: remove
+ */
 export { Launcher };
 
 export default class SSH {
