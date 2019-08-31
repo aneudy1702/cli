@@ -18,7 +18,7 @@ export default class Launcher {
   }
 
   static start(options = {}) {
-    const daemonBin = config.ocm.ssh.daemon.bin;
+    const daemonBin = config.ocm.daemon.bin;
 
     return Launcher.isStopped()
       .then(pIf(

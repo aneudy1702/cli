@@ -45,7 +45,7 @@ export default class Daemon {
 
     pRetry(
       () => ssh.connect(),
-      { forever: true, maxTimeout: 1000, maxRetryTime: config.ocm.ssh.daemon.timeout },
+      { forever: true, maxTimeout: 1000, maxRetryTime: config.ocm.daemon.timeout },
     )
       .then(() => {
         ipc.server.off('connect', noSSH);

@@ -32,13 +32,19 @@ export default {
         public: 'ocm_rsa.pub',
         private: 'ocm_rsa',
       },
-      daemon: {
-        bin: 'ocm-daemon',
-        timeout: 60000,
-      },
+    },
+    daemon: {
+      bin: 'ocm-daemon',
+      timeout: 60000,
+    },
+    cli: {
+      timeout: 2000,
     },
   },
   vboxmanage: {
     bin: process.platform === 'win32' ? path.join(process.env.VBOX_MSI_INSTALL_PATH, 'VBoxManage') || 'VBoxManage' : 'VBoxManage',
+    unregister: {
+      timeout: 10000,
+    },
   },
 };

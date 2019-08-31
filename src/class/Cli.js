@@ -1,6 +1,7 @@
 import ora from 'ora';
 import Client from './Cli/IPC/Client';
 import Launcher from './Daemon/Launcher';
+import config from '../config';
 
 export default class Cli {
   constructor() {
@@ -20,7 +21,7 @@ export default class Cli {
     this.client.on('error', (err) => {
       if (!this.retried) {
         this.retried = true;
-        Launcher.start({ interval: 100, timeout: 2000 })
+        Launcher.start({ interval: 100, timeout: config.ocm.cli.timeout })
           .then(() => this.exec(cmd))
           .catch(() => this.fail(err));
       } else {

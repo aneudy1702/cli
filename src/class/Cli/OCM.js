@@ -169,7 +169,7 @@ export default class OCM {
     return OCM.get()
       .then((ocm) => pRetry(
         () => VirtualBox.unregister(ocm, { delete: true }),
-        { forever: true, maxTimeout: 1000, maxRetryTime: 10000 },
+        { forever: true, maxTimeout: 1000, maxRetryTime: config.vboxmanage.unregister.timeout },
       ))
       .then(() => spinner.succeed('OCM unregistered'))
       .catch(pTap.catch(() => spinner.fail()));
@@ -195,7 +195,7 @@ export default class OCM {
 
   static startSSHDaemon() {
     const spinner = ora('Starting OCM SSH daemon').start();
-    return SSH.start({ interval: 100, timeout: 60000 })
+    return SSH.start({ interval: 100, timeout: config.ocm.daemon.timeout })
       .then(() => spinner.succeed('OCM SSH daemon running'))
       .catch(pTap.catch(() => spinner.fail()));
   }
@@ -218,7 +218,11 @@ export default class OCM {
       }));
     };
 
-    return SSH.exec(cmd, { interval: 100, timeout: 2000, ready: cmd ? clear : ready })
+    return SSH.exec(cmd, {
+      interval: 100,
+      timeout: config.ocam.cli.timeout,
+      ready: cmd ? clear : ready,
+    })
       .catch((err) => { clear(); spinner.fail(err.message); });
   }
 
