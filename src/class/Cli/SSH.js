@@ -40,15 +40,24 @@ export default class SSH {
       });
   }
 
+  /**
+   * TODO: remove
+   */
   static status() {
     const client = new Client();
     return client.status();
   }
 
+  /**
+   * TODO: move to OCM
+   */
   static start(options = {}) {
     return Launcher.start(options);
   }
 
+  /**
+   * TODO: move to OCM
+   */
   static exec(cmd, options = {}) {
     return Launcher.start(options)
       .then(() => new Promise((resolve, reject) => {
