@@ -4,4 +4,4 @@ import Cli from './class/Cli';
 
 const args = process.argv.slice(2).join(' ');
 const cli = new Cli();
-cli.exec(`sudo podman ${args}`);
+cli.exec(`podman ${args}`);
