@@ -22,7 +22,7 @@ if (input.length > 0) {
     case 'start':
       OCM.start()
         .then(OCM.waitGuestAdditionnals)
-        .then(OCM.startSSHDaemon)
+        .then(OCM.startDaemon)
         .catch((err) => error(err.message));
       break;
     case 'stop':

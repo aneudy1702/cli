@@ -8,8 +8,10 @@ import pFinally from 'p-finally';
 import pRetry from 'p-retry';
 import pTap from 'p-tap';
 import download from './Download';
-import SSH from './SSH';
+import Client from './IPC/Client';
+import Launcher from '../Daemon/Launcher';
 import VirtualBox from './VirtualBox';
+import SSH from './SSH';
 import config from '../../config';
 
 const { ssh } = config.ocm;
@@ -38,6 +40,8 @@ export default class OCM {
   static status() {
     const spinner = ora();
     const sshSpinner = ora();
+    const client = new Client();
+
     return OCM.get()
       .then(pTap(pIf(
         (ocm) => ocm.vmstate === 'running' && ocm.guestadditionsrunlevel === '2',
@@ -51,7 +55,7 @@ export default class OCM {
         (ocm) => ocm.vmstate !== 'running',
         () => spinner.fail('OCM stopped'),
       )))
-      .then(SSH.status)
+      .then(() => client.status())
       .then(pIf(
         (state) => state === 'running',
         () => sshSpinner.succeed('SSH daemon running'),
@@ -193,9 +197,10 @@ export default class OCM {
       .catch(pTap.catch(() => spinner.fail()));
   }
 
-  static startSSHDaemon() {
+  static startDaemon() {
     const spinner = ora('Starting OCM SSH daemon').start();
-    return SSH.start({ interval: 100, timeout: config.ocm.daemon.timeout })
+
+    return Launcher.start({ interval: 100, timeout: config.ocm.daemon.timeout })
       .then(() => spinner.succeed('OCM SSH daemon running'))
       .catch(pTap.catch(() => spinner.fail()));
   }
@@ -218,11 +223,19 @@ export default class OCM {
       }));
     };
 
-    return SSH.exec(cmd, {
+    const options = {
       interval: 100,
-      timeout: config.ocam.cli.timeout,
+      timeout: config.ocm.cli.timeout,
       ready: cmd ? clear : ready,
-    })
+    };
+
+    return Launcher.start(options)
+      .then(() => new Promise((resolve, reject) => {
+        const client = new Client();
+        client.exec(cmd, options);
+        client.on('end', () => { resolve(); });
+        client.on('error', (error) => { reject(error); });
+      }))
       .catch((err) => { clear(); spinner.fail(err.message); });
   }
 

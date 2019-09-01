@@ -25,7 +25,7 @@ export default class Setup {
       .then(OCM.start)
       .then(OCM.waitGuestAdditionnals)
       .then(OCM.importSSHKey)
-      .then(OCM.startSSHDaemon);
+      .then(OCM.startDaemon);
   }
 
   static ask(checks) {

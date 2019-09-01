@@ -5,13 +5,6 @@ import pify from 'pify';
 import pAll from 'p-all';
 import os from 'os';
 import { generateKeyPair } from 'crypto';
-import Client from './IPC/Client';
-import Launcher from '../Daemon/Launcher';
-
-/**
- * TODO: remove
- */
-export { Launcher };
 
 export default class SSH {
   static existsKeys(keyName) {
@@ -41,33 +34,5 @@ export default class SSH {
           private: forge.ssh.privateKeyToOpenSSH(privateKeyBuffer, passphrase),
         };
       });
-  }
-
-  /**
-   * TODO: remove
-   */
-  static status() {
-    const client = new Client();
-    return client.status();
-  }
-
-  /**
-   * TODO: move to OCM
-   */
-  static start(options = {}) {
-    return Launcher.start(options);
-  }
-
-  /**
-   * TODO: move to OCM
-   */
-  static exec(cmd, options = {}) {
-    return Launcher.start(options)
-      .then(() => new Promise((resolve, reject) => {
-        const client = new Client();
-        client.exec(cmd, options);
-        client.on('end', () => { resolve(); });
-        client.on('error', (error) => { reject(error); });
-      }));
   }
 }
