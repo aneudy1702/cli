@@ -4,34 +4,25 @@ import Launcher from './Daemon/Launcher';
 import config from '../config';
 
 export default class Cli {
-  constructor() {
-    this.client = new Client();
-    this.spinner = ora('Connecting to OCM SSH daemon');
-    this.retried = false;
-  }
+  static exec(cmd) {
+    const spinner = ora('Connecting to OCM');
+    const timeout = setTimeout(() => spinner.start(), 200);
+    const clear = () => { clearTimeout(timeout); spinner.stop(); };
+    const ready = () => { clear(); };
 
-  clear() {
-    clearTimeout(this.timeout);
-    this.spinner.stop();
-  }
+    const options = {
+      interval: 100,
+      timeout: config.ocm.cli.timeout,
+      ready: cmd ? clear : ready,
+    };
 
-  exec(cmd) {
-    this.timeout = setTimeout(() => this.spinner.start(), 50);
-    this.client.exec(cmd, { ready: this.clear.bind(this) });
-    this.client.on('error', (err) => {
-      if (!this.retried) {
-        this.retried = true;
-        Launcher.start({ interval: 100, timeout: config.ocm.cli.timeout })
-          .then(() => this.exec(cmd))
-          .catch(() => this.fail(err));
-      } else {
-        this.fail(err);
-      }
-    });
-  }
-
-  fail(err) {
-    this.clear();
-    this.spinner.fail(err.message);
+    return Launcher.start(options)
+      .then(() => new Promise((resolve, reject) => {
+        const client = new Client();
+        client.exec(cmd, options);
+        client.on('end', () => { resolve(); });
+        client.on('error', (error) => { reject(error); });
+      }))
+      .catch((err) => { clear(); spinner.fail(err.message); });
   }
 }
