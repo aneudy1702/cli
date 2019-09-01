@@ -24,7 +24,7 @@ export default class Monitoring extends EventEmitter {
     const ssh = new Exec(this.client, null, null, { events: controller });
     this.internal.on('stop', () => controller.emit('stop'));
 
-    ssh.exec('podman events --format json --filter type=container');
+    ssh.exec('sudo podman events --format json --filter type=container');
     ssh.on('stdout', (output) => {
       const events = output.toString().split('\n').filter((e) => e !== '');
       const containers = events.map((evt) => {
@@ -59,7 +59,7 @@ export default class Monitoring extends EventEmitter {
     return new Promise((resolve, reject) => {
       const ssh = new Exec(this.client);
 
-      ssh.exec('podman ps -q', null, null, { returnOutput: true });
+      ssh.exec('sudo podman ps -q', null, null, { returnOutput: true });
       ssh.on('end', (output) => {
         resolve(
           output
@@ -78,7 +78,7 @@ export default class Monitoring extends EventEmitter {
       const ssh = new Exec(this.client);
       const containersList = containers.join(' ');
 
-      ssh.exec(`podman inspect ${containersList}`, null, null, { returnOutput: true });
+      ssh.exec(`sudo podman inspect ${containersList}`, null, null, { returnOutput: true });
       ssh.on('end', (output) => {
         let data = null;
         try {
