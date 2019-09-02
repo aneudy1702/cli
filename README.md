@@ -16,15 +16,15 @@
 
 ## Install
 
-
-```
-$ yarn global add @open-container-manager/cli
-```
-
-or
-
 ```
 $ npx @open-container-manager/cli
+```
+
+or from source
+
+```
+$ npm run build
+$ npm -g i file:$PWD
 ```
 
 
