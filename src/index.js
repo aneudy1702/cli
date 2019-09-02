@@ -5,45 +5,55 @@ import pIf from 'p-if';
 import OCM from './class/Cli/OCM';
 import Setup from './class/Cli/Setup';
 
-const { error } = console;
+const { log, error } = console;
 
 const input = process.argv.slice(2);
 
-if (input.length > 0) {
-  switch (input[0]) {
-    case 'install':
-      Setup.install()
-        .catch((err) => error(err.message));
-      break;
-    case 'status':
-      OCM.status();
-      break;
-    case 'console':
-    case 'shell':
-      OCM.shell();
-      break;
-    case 'start':
-      OCM.get()
-        .then(pIf(
-          (ocm) => ocm.vmstate !== 'running',
-          () => OCM.start()
-            .then(OCM.waitGuestAdditionnals)
-            .then(OCM.startDaemon)
-            .then(OCM.existsPersistentStorage),
-          () => new Ora('OCM running').succeed(),
-        ))
-        .catch((err) => error(err.message));
-      break;
-    case 'stop':
-      OCM.get()
-        .then(pIf(
-          (ocm) => ocm.vmstate === 'running',
-          () => OCM.acpipower(),
-          () => new Ora('OCM stopped').succeed(),
-        ))
-        .catch((err) => error(err.message));
-      break;
-    default:
-      break;
-  }
+switch (input[0] || null) {
+  case 'install':
+    Setup.install()
+      .catch((err) => error(err.message));
+    break;
+  case 'status':
+    OCM.status();
+    break;
+  case 'console':
+  case 'shell':
+    OCM.shell();
+    break;
+  case 'start':
+    OCM.get()
+      .then(pIf(
+        (ocm) => ocm.vmstate !== 'running',
+        () => OCM.start()
+          .then(OCM.waitGuestAdditionnals)
+          .then(OCM.startDaemon)
+          .then(OCM.existsPersistentStorage),
+        () => new Ora('OCM running').succeed(),
+      ))
+      .catch((err) => error(err.message));
+    break;
+  case 'stop':
+    OCM.get()
+      .then(pIf(
+        (ocm) => ocm.vmstate === 'running',
+        () => OCM.acpipower(),
+        () => new Ora('OCM stopped').succeed(),
+      ))
+      .catch((err) => error(err.message));
+    break;
+  default:
+    log(`manage ocm virtual machine
+
+Usage:
+  ocm [command]
+
+Available commands:
+  install     Download & install OCM virtual mahcine
+  status      Display the status of the OCM virtual machine
+  start       Start the OCM virtual machine
+  stop        Stop the OCM virtual machine
+  console     Open an interactive console
+`);
+    break;
 }
