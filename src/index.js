@@ -18,6 +18,7 @@ if (input.length > 0) {
     case 'status':
       OCM.status();
       break;
+    case 'console':
     case 'shell':
       OCM.shell();
       break;
