@@ -1,7 +1,7 @@
 {
   "name": "@open-containers-manager/cli",
   "version": "1.0.0",
-  "repository": "git@github.com:adeo/open-containers-manager.git",
+  "repository": "git@github.com:open-containers-manager/cli.git",
   "author": "Tony DUBURQUE <tony.duburque@leroymerlin.fr>",
   "license": "MIT",
   "main": "bin/index.js",
