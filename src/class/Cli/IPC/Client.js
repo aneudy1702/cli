@@ -54,6 +54,7 @@ export default class Client extends EventEmitter {
           cmd: cmd || null,
           options: {
             pty: cmd ? window : true,
+            stdio: options.stdio,
           },
           window: !cmd ? window : null,
         });

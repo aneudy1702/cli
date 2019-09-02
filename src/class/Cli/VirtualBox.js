@@ -65,6 +65,16 @@ export default class VirtualBox {
     return pExec(`"${config.vboxmanage.bin}" sharedfolder remove ${vm.uuid || vm.name || vm} ${args}`);
   }
 
+  static createmedium(type = 'disk', options = {}) {
+    const args = getArgs(options);
+    return pExec(`"${config.vboxmanage.bin}" createmedium ${type} ${args}`);
+  }
+
+  static storageattach(vm, options = {}) {
+    const args = getArgs(options);
+    return pExec(`"${config.vboxmanage.bin}" storageattach ${vm.uuid || vm.name || vm} ${args}`);
+  }
+
   static import(ovaFile, options = {}) {
     const args = getArgs(options);
     return pExec(`"${config.vboxmanage.bin}" import "${ovaFile}" ${args}`);

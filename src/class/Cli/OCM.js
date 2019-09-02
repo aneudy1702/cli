@@ -1,12 +1,12 @@
-import boxen from 'boxen';
-import chalk from 'chalk';
 import fs from 'fs-extra';
 import ora from 'ora';
+import os from 'os';
 import path from 'path';
 import pIf from 'p-if';
-import pFinally from 'p-finally';
 import pRetry from 'p-retry';
 import pTap from 'p-tap';
+import pWaitFor from 'p-wait-for';
+import Cli from '../Cli';
 import download from './Download';
 import Client from './IPC/Client';
 import Launcher from '../Daemon/Launcher';
@@ -69,10 +69,13 @@ export default class OCM {
   }
 
   static delete() {
-    return pFinally(
-      OCM.stop(),
-      OCM.unregister,
-    );
+    return OCM.acpipower()
+      .then(OCM.existsPersistentStorage)
+      .then(pIf(
+        (exists) => exists === true,
+        () => OCM.detachPersistentStorage(),
+      ))
+      .then(OCM.unregister);
   }
 
   static download() {
@@ -164,6 +167,12 @@ export default class OCM {
         (ocm) => ocm.vmstate === 'running',
         VirtualBox.acpipowerbutton,
       ))
+      .then(() => pWaitFor(
+        () => OCM.get()
+          .catch(() => ({}))
+          .then((ocm) => ocm.vmstate === 'poweroff'),
+        { interval: 100, timeout: config.vboxmanage.acpipower.timeout },
+      ))
       .then(() => spinner.succeed('OCM stopped by acpi'))
       .catch(pTap.catch(() => spinner.fail()));
   }
@@ -197,6 +206,76 @@ export default class OCM {
       .catch(pTap.catch(() => spinner.fail()));
   }
 
+  static existsPersistentStorage() {
+    const persistentFile = path.join(os.homedir(), '.ocm', 'ocm-persistent.vmdk');
+
+    return fs.pathExists(persistentFile);
+  }
+
+  static createPersistentStorage() {
+    const spinner = ora('Create persistent storage');
+    const persistentFile = path.join(os.homedir(), '.ocm', 'ocm-persistent.vmdk');
+
+    return OCM.existsPersistentStorage()
+      .then(pIf(
+        (exists) => exists === false,
+        () => fs.ensureDir(path.dirname(persistentFile))
+          .then(() => spinner.start())
+          .then(() => VirtualBox.createmedium('disk', {
+            filename: persistentFile,
+            size: '65536',
+            format: 'VMDK',
+          })),
+      ))
+      .then(() => spinner.succeed('Persistent storage created'))
+      .catch(pTap.catch(() => spinner.fail()));
+  }
+
+  static attachPersistentStorage() {
+    const spinner = ora('Attach persistent storage').start();
+    const persistentFile = path.join(os.homedir(), '.ocm', 'ocm-persistent.vmdk');
+
+    return VirtualBox.storageattach('ocm', {
+      storagectl: 'SATA',
+      port: '1',
+      device: '0',
+      type: 'hdd',
+      medium: persistentFile,
+    })
+      .then(() => spinner.succeed('Persistent storage attached'))
+      .catch(pTap.catch(() => spinner.fail()));
+  }
+
+  static detachPersistentStorage() {
+    const spinner = ora('Detach persistent storage').start();
+
+    return VirtualBox.storageattach('ocm', {
+      storagectl: 'SATA',
+      port: '1',
+      device: '0',
+      type: 'hdd',
+      medium: 'none',
+    })
+      .then(() => spinner.succeed('Persistent storage detached'))
+      .catch(pTap.catch(() => spinner.fail()));
+  }
+
+  static formatPersistentStorage() {
+    const spinner = ora('Mount persistent storage').start();
+
+    return OCM.exec('sudo mkfs.ext4 /dev/sdb')
+      .then(() => spinner.succeed('Persistent storage formated'))
+      .catch(pTap.catch(() => spinner.fail()));
+  }
+
+  static mountPersistentStorage() {
+    const spinner = ora('Mount persistent storage').start();
+
+    return OCM.exec('sudo mkdir /persistent && echo -e "# Persistent storage\\n/dev/sdb\\t\\t/persistent\\text4\\trw,relatime\\t0 1\\n" | sudo tee -a /etc/fstab && sudo mount /persistent && sudo sed -i -e \'s#root = "#root = "\\/persistent#g\' /etc/containers/storage.conf')
+      .then(() => spinner.succeed('Persistent storage mounted'))
+      .catch(pTap.catch(() => spinner.fail()));
+  }
+
   static startDaemon() {
     const spinner = ora('Starting OCM SSH daemon').start();
 
@@ -206,40 +285,10 @@ export default class OCM {
   }
 
   static exec(cmd) {
-    const spinner = ora('Connecting to OCM');
-    const timeout = setTimeout(() => spinner.start(), 200);
-    const clear = () => { clearTimeout(timeout); spinner.stop(); };
-    const ready = () => {
-      clear();
-
-      const { error } = console;
-
-      error(boxen(chalk.cyan('Experimental feature'), {
-        padding: 1,
-        margin: 1,
-        align: 'center',
-        borderColor: 'yellow',
-        borderStyle: 'round',
-      }));
-    };
-
-    const options = {
-      interval: 100,
-      timeout: config.ocm.cli.timeout,
-      ready: cmd ? clear : ready,
-    };
-
-    return Launcher.start(options)
-      .then(() => new Promise((resolve, reject) => {
-        const client = new Client();
-        client.exec(cmd, options);
-        client.on('end', () => { resolve(); });
-        client.on('error', (error) => { reject(error); });
-      }))
-      .catch((err) => { clear(); spinner.fail(err.message); });
+    return Cli.exec(cmd, { stdio: false });
   }
 
   static shell() {
-    return OCM.exec();
+    return Cli.exec();
   }
 }

@@ -37,15 +37,21 @@ export default class Exec extends EventEmitter {
 
         const outputs = [];
         stream.on('data', (output) => {
-          this.emit('stdout', output);
+          if (options.stdio !== false) {
+            this.emit('stdout', output);
+          }
           if (streams && streams.returnOutput === true) {
             outputs.push(output);
           }
         });
-        stream.stderr.on('data', (output) => { this.emit('stderr', output); });
+        stream.stderr.on('data', (output) => {
+          if (options.stdio !== false) {
+            this.emit('stderr', output);
+          }
+        });
 
         stream.on('end', () => {
-          const output = streams.returnOutput ? outputs.join('') : undefined;
+          const output = streams && streams.returnOutput === true ? outputs.join('') : undefined;
           this.emit('end', output);
         });
         stream.on('error', (err) => { this.emit('error', err); });

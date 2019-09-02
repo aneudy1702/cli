@@ -43,6 +43,9 @@ export default {
   },
   vboxmanage: {
     bin: process.platform === 'win32' ? path.join(process.env.VBOX_MSI_INSTALL_PATH, 'VBoxManage') || 'VBoxManage' : 'VBoxManage',
+    acpipower: {
+      timeout: 10000,
+    },
     unregister: {
       timeout: 10000,
     },

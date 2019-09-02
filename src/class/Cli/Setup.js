@@ -22,10 +22,21 @@ export default class Setup {
         () => path.join(config.ocm.download.path, config.ocm.download.file),
       ))
       .then(OCM.import)
-      .then(OCM.start)
-      .then(OCM.waitGuestAdditionnals)
-      .then(OCM.importSSHKey)
-      .then(OCM.startDaemon);
+      .then(OCM.existsPersistentStorage)
+      .then(pTap(pIf(
+        (exists) => exists === false,
+        OCM.createPersistentStorage,
+      )))
+      .then(pTap(OCM.attachPersistentStorage))
+      .then(pTap(OCM.start))
+      .then(pTap(OCM.waitGuestAdditionnals))
+      .then(pTap(OCM.importSSHKey))
+      .then(pTap(OCM.startDaemon))
+      .then(pIf(
+        (exists) => exists === false,
+        OCM.formatPersistentStorage,
+      ))
+      .then(OCM.mountPersistentStorage);
   }
 
   static ask(checks) {

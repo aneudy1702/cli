@@ -26,5 +26,6 @@ if (input.length > 1 && input[0] === 'build') {
     }))
     .catch((err) => { error(err.message); });
 } else {
-  Cli.exec(`sudo podman ${args}`);
+  Cli.exec(`sudo podman ${args}`)
+    .catch((err) => error(err.message));
 }

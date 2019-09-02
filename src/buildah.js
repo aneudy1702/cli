@@ -31,5 +31,6 @@ if (input.length > 1 && (
     }))
     .catch((err) => { error(err.message); });
 } else {
-  Cli.exec(`sudo buildah ${args}`);
+  Cli.exec(`sudo buildah ${args}`)
+    .catch((err) => error(err.message));
 }

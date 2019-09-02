@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+import Ora from 'ora';
+import pIf from 'p-if';
 import OCM from './class/Cli/OCM';
 import Setup from './class/Cli/Setup';
 
@@ -20,13 +22,24 @@ if (input.length > 0) {
       OCM.shell();
       break;
     case 'start':
-      OCM.start()
-        .then(OCM.waitGuestAdditionnals)
-        .then(OCM.startDaemon)
+      OCM.get()
+        .then(pIf(
+          (ocm) => ocm.vmstate !== 'running',
+          () => OCM.start()
+            .then(OCM.waitGuestAdditionnals)
+            .then(OCM.startDaemon)
+            .then(OCM.existsPersistentStorage),
+          () => new Ora('OCM running').succeed(),
+        ))
         .catch((err) => error(err.message));
       break;
     case 'stop':
-      OCM.acpipower()
+      OCM.get()
+        .then(pIf(
+          (ocm) => ocm.vmstate === 'running',
+          () => OCM.acpipower(),
+          () => new Ora('OCM stopped').succeed(),
+        ))
         .catch((err) => error(err.message));
       break;
     default:
