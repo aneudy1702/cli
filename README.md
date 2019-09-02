@@ -1,9 +1,9 @@
 # Open Containers Manager
 > CLI app to use podman & buildah through VirtualBox VM "seamlessly"
 
-![NPM Package](https://img.shields.io/npm/v/@open-containers-manager/cli)
-![Travis CI](https://img.shields.io/travis/open-containers-manager/cli)
-![License](https://img.shields.io/github/license/open-containers-manager/cli)
+[![NPM Package](https://img.shields.io/npm/v/@open-containers-manager/cli)](https://www.npmjs.com/package/@open-containers-manager/cli)
+[![Travis CI](https://img.shields.io/travis/open-containers-manager/cli)](https://travis-ci.org/open-containers-manager/cli)
+[![License](https://img.shields.io/github/license/open-containers-manager/cli)](https://github.com/open-containers-manager/cli/blob/master/LICENSE)
 
 ## Features
 - Download and install OCM VirtualBox VM
