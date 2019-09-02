@@ -17,7 +17,7 @@
 ## Install
 
 ```
-$ npx @open-container-manager/cli
+$ npm -g i @open-container-manager/cli
 ```
 
 or from source
