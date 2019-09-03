@@ -1,6 +1,7 @@
 import EventEmitter from 'events';
 import pAll from 'p-all';
 import pIf from 'p-if';
+import pTap from 'p-tap';
 import { PassThrough } from 'stream';
 import { Exec, Forward } from '../SSH';
 
@@ -12,11 +13,14 @@ export default class Monitoring extends EventEmitter {
     this.internal = new EventEmitter();
 
     this.forwards = [];
+    this.running = false;
   }
 
   start() {
+    this.running = true;
     return this.init()
-      .then(() => this.listen());
+      .then(() => this.listen())
+      .catch(pTap.catch(() => this.stop()));
   }
 
   listen() {
@@ -52,7 +56,14 @@ export default class Monitoring extends EventEmitter {
   }
 
   stop() {
-    this.internal.emit('stop');
+    return pIf(
+      this.running === true,
+      () => {
+        this.running = false;
+        this.internal.emit('stop');
+        return this.unforward(this.forwards.map((container) => container.id));
+      },
+    )();
   }
 
   init() {

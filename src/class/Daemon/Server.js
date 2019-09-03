@@ -34,14 +34,18 @@ export default class Daemon {
 
   serve() {
     const { ipc, ssh } = this;
-    // ipc.server.on('stop', this.stop.bind(this));
     const noSSH = this.noSSH.bind(this);
-    const stop = this.stop.bind(this);
     const remote = this.remote.bind(this);
     const monitoring = new Monitoring(ssh);
+    const stop = () => {
+      ssh.disconnect();
+      monitoring.stop();
+      this.stop();
+    };
     const { log, error } = console;
 
     ipc.server.on('connect', noSSH);
+    ipc.server.on('stop', stop());
 
     pRetry(
       () => ssh.connect(),
@@ -50,12 +54,13 @@ export default class Daemon {
       .then(() => {
         ipc.server.off('connect', noSSH);
 
-        ipc.server.on('stop', () => { monitoring.stop(); ssh.disconnect(); });
-        ssh.on('end', () => { monitoring.stop(); stop(); });
+        ssh.on('end', () => { ssh.removeAllListeners('end'); stop(); });
+        ssh.on('error', (err) => { error(err); stop(); });
 
         monitoring.on('forward', (port) => { log('forward', port); });
         monitoring.on('unforward', (port) => { log('unforward', port); });
-        monitoring.on('error', (err) => { error(err); });
+        monitoring.on('end', () => { stop(); });
+        monitoring.on('error', (err) => { error(err); stop(); });
 
         return monitoring.start();
       })
@@ -68,7 +73,6 @@ export default class Daemon {
       .catch((err) => {
         error(err);
         stop();
-        ssh.disconnect();
       });
   }
 
