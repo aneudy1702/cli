@@ -21,12 +21,13 @@
 ## Install
 
 ```
-$ npm -g i @open-container-manager/cli
+$ npm -g i @open-containers-manager/cli
 ```
 
 or from source
 
 ```
+$ npm i
 $ npm run build
 $ npm -g i file:$PWD
 ```
