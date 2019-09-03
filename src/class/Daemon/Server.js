@@ -45,7 +45,7 @@ export default class Daemon {
     const { log, error } = console;
 
     ipc.server.on('connect', noSSH);
-    ipc.server.on('stop', stop());
+    ipc.server.on('stop', () => stop());
 
     pRetry(
       () => ssh.connect(),
