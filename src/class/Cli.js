@@ -6,6 +6,16 @@ import Launcher from './Daemon/Launcher';
 import config from '../config';
 
 export default class Cli {
+  static escape(cmd) {
+    return cmd.map((arg) => {
+      if (arg.includes(' ')) {
+        return `'${arg}'`;
+      }
+
+      return arg;
+    });
+  }
+
   static exec(cmd, opts = {}) {
     const spinner = ora('Connecting to OCM');
     const timeout = opts.stdio !== false ? setTimeout(() => spinner.start(), 200) : null;

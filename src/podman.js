@@ -6,7 +6,7 @@ import VirtualBox from './class/Cli/VirtualBox';
 
 const { error } = console;
 const input = process.argv.slice(2);
-const args = input.join(' ');
+const args = Cli.escape(input).join(' ');
 
 if (input.length > 1 && input[0] === 'build') {
   const id = uuid();
