@@ -15,7 +15,13 @@ export default class Connection extends EventEmitter {
     return fs.readFile(path.join(this.config.keys.path, this.config.keys.private))
       .then((privateKey) => new Promise((resolve, reject) => {
         const { client } = this;
-        const { host, port, credential, keepaliveInterval } = this.config;
+        const {
+          host,
+          port,
+          credential,
+          keepaliveInterval,
+        } = this.config;
+
         client.connect({
           host,
           port,
