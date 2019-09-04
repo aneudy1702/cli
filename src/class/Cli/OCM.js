@@ -150,7 +150,7 @@ export default class OCM {
   }
 
   static stop() {
-    const spinner = ora('Stoping OCM').start();
+    const spinner = ora('Stopping OCM').start();
     return OCM.get()
       .then(pIf(
         (ocm) => ocm.vmstate === 'running' || ocm.vmstate === 'paused',
@@ -161,7 +161,7 @@ export default class OCM {
   }
 
   static acpipower() {
-    const spinner = ora('Stoping OCM by acpi').start();
+    const spinner = ora('Stopping OCM by acpi').start();
     return OCM.get()
       .then(pIf(
         (ocm) => ocm.vmstate === 'running',
