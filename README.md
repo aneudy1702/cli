@@ -55,12 +55,12 @@ Available commands:
 
 ### Podman
 ```
-Use "podman --help" for me information about command.
+Use "podman --help" for more informations about command.
 ```
 
 ### Buildah
 ```
-Use "buildah --help" for me information about command.
+Use "buildah --help" for more informations about command.
 ```
 
 ### OCM Daemon
