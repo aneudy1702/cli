@@ -8,11 +8,12 @@ const { error } = console;
 const input = process.argv.slice(2);
 const args = Cli.escape(input).join(' ');
 
-if (input.length > 1 && (
+if (input.length >= 1 && (
   input[0] === 'bud'
   || input[0] === 'build-using-dockerfile'
   || input[0] === 'add'
   || input[0] === 'copy'
+  || input[0] === 'unshare'
 )) {
   const id = uuid();
 
