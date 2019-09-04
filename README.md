@@ -17,6 +17,11 @@
 - Mounting a host volume in containers is not supported
 - Remove OCM virtual machine from VirtualBox __removes persistent storage__, detaches it before
 
+## Requirements
+
+* Linux, MacOS X or Windows with nodejs v10.
+* VirtualBox
+
 ## Install
 
 ```
