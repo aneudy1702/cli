@@ -271,7 +271,10 @@ export default class OCM {
   static mountPersistentStorage() {
     const spinner = ora('Mount persistent storage').start();
 
-    return OCM.exec('sudo mkdir /persistent && echo -e "# Persistent storage\\n/dev/sdb\\t\\t/persistent\\text4\\trw,relatime\\t0 1\\n" | sudo tee -a /etc/fstab && sudo mount /persistent && sudo sed -i -e \'s#root = "#root = "\\/persistent#g\' /etc/containers/storage.conf')
+    return OCM.exec('sudo mkdir /persistent')
+      .then(() => OCM.exec('echo -e "# Persistent storage\\n/dev/sdb\\t\\t/persistent\\text4\\trw,relatime\\t0 2\\n" | sudo tee -a /etc/fstab'))
+      .then(() => OCM.exec('sudo mount /persistent'))
+      .then(() => OCM.exec('sudo sed -i -e \'s#root = "#root = "\\/persistent#g\' /etc/containers/storage.conf'))
       .then(() => spinner.succeed('Persistent storage mounted'))
       .catch(pTap.catch(() => spinner.fail()));
   }
