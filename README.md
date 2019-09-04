@@ -13,9 +13,8 @@
 - Persistent storage in separate VMDK (`~/.ocm/ocm-persistent.vmdk`)
 
 ## Limitations
-- Only mount the current directory
-- Podman `build` & Buildah `build-using-dockerfile`, `bud`, `add`, `copy`, `unshare` commands should be used with a relative path under current directory
-- The `unshare` Buildah command called without argument does not mount the current directory
+- Podman `build` & Buildah `build-using-dockerfile`, `bud`, `add`, `copy`, `unshare` commands should be used with a relative path under current directory (current directory is mounted in the virtual machine)
+- Mounting a host volume in containers is not supported
 - Remove OCM virtual machine from VirtualBox __removes persistent storage__, detaches it before
 
 ## Install
