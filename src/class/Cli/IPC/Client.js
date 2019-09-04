@@ -60,13 +60,13 @@ export default class Client extends EventEmitter {
         });
 
         client.of.daemon.on('stdin-request', () => {
+          const captureStdin = (data) => { client.of.daemon.emit('stdin', data); };
           stdin.setRawMode(true);
-          stdin.on('data', (data) => {
-            client.of.daemon.emit('stdin', data);
-          });
+          stdin.on('data', captureStdin);
+          stdin.unref();
 
           client.of.daemon.on('disconnect', () => {
-            stdin.unref();
+            stdin.removeListener('data', captureStdin);
           });
         });
 
