@@ -32,6 +32,7 @@ export default {
         public: 'ocm_rsa.pub',
         private: 'ocm_rsa',
       },
+      keepaliveInterval: 250,
     },
     daemon: {
       bin: 'ocm-daemon',
