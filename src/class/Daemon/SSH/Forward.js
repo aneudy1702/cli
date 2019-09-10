@@ -15,6 +15,7 @@ export default class Forward extends Events {
           client.pipe(stream);
           stream.pipe(client);
 
+          client.on('error', (err) => { stream.end(); });
           client.on('close', () => { stream.end(); });
         })
         .catch((err) => { this.emit('error', err); });
