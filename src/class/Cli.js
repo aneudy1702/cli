@@ -8,7 +8,7 @@ import config from '../config';
 export default class Cli {
   static escape(cmd) {
     return cmd.map((arg) => {
-      if (arg.includes(' ')) {
+      if (arg.includes(' ') || arg.includes('&')) {
         return `'${arg}'`;
       }
 
