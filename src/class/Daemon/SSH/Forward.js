@@ -1,6 +1,7 @@
 import Events from 'events';
 import net from 'net';
 import pify from 'pify';
+import pIf from 'p-if';
 import enableDestroy from 'server-destroy';
 
 export default class Forward extends Events {
@@ -34,6 +35,9 @@ export default class Forward extends Events {
   }
 
   stop() {
-    return pify(this.server.destroy.bind(this.server))();
+    return pIf(
+      this.server.listening === true,
+      pify(this.server.destroy.bind(this.server)),
+    )();
   }
 }
