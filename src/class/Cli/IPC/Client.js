@@ -83,6 +83,7 @@ export default class Client extends EventEmitter {
         });
 
         client.of.daemon.on('end', () => {
+          stdout.removeAllListeners('resize');
           this.emit('end');
           client.disconnect('daemon');
         });
