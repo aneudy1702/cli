@@ -25,7 +25,7 @@ if (input.length >= 1 && (
   })
     .then(() => Cli.exec(`mkdir -p /tmp/ocm-volatile/${id}`))
     .then(() => Cli.exec(`sudo mount -t vboxsf -o gid=vboxsf ${id} /tmp/ocm-volatile/${id}`))
-    .then(() => Cli.exec(`cd /tmp/ocm-volatile/${id} && sudo buildah ${args}`))
+    .then(() => Cli.exec(`cd /tmp/ocm-volatile/${id} && buildah ${args}`))
     .then(() => Cli.exec(`sudo umount /tmp/ocm-volatile/${id}`))
     .then(() => Cli.exec(`rmdir /tmp/ocm-volatile/${id}`))
     .then(() => VirtualBox.unshare('ocm', {
