@@ -58,7 +58,10 @@ export default class Daemon {
         monitoring.on('end', () => { stop(); });
         monitoring.on('error', (err) => { error(err); stop(); });
 
-        return monitoring.start();
+        pRetry(
+          () => monitoring.start(),
+          { forever: true, maxTimeout: 1000, maxRetryTime: config.ocm.daemon.timeout },
+        );
       })
       .then(() => {
         ipc.server.broadcast('ready');
