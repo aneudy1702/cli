@@ -27,6 +27,9 @@ if (input.length > 1 && input[0] === 'build') {
       transient: true,
     }))
     .catch((err) => { error(err.message); });
+} if (input.length > 1 && input[0] === 'network') {
+  Cli.exec(`sudo podman ${args}`)
+    .catch((err) => error(err.message));
 } else {
   Cli.exec(`podman ${args}`)
     .catch((err) => error(err.message));
