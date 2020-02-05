@@ -4,6 +4,7 @@ import Ora from 'ora';
 import pIf from 'p-if';
 import OCM from './class/Cli/OCM';
 import Setup from './class/Cli/Setup';
+import { version } from '../package.json';
 
 const { log, error } = console;
 
@@ -41,6 +42,10 @@ switch (input[0] || null) {
         () => new Ora('OCM stopped').succeed(),
       ))
       .catch((err) => error(err.message));
+    break;
+  case '-v':
+  case '--version':
+    log(version);
     break;
   default:
     log(`manage ocm virtual machine
