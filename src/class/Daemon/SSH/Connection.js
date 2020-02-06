@@ -19,7 +19,6 @@ export default class Connection extends EventEmitter {
           host,
           port,
           credential,
-          keepaliveInterval,
         } = this.config;
 
         client.connect({
@@ -27,7 +26,6 @@ export default class Connection extends EventEmitter {
           port,
           username: credential.username,
           privateKey,
-          keepaliveInterval,
         });
 
         client.on('ready', () => { resolve(); });
