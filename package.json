@@ -14,8 +14,8 @@
   },
   "scripts": {
     "build": "babel src --out-dir bin",
-    "dev": "nodemon --watch src -e js --exec eslint src",
-    "lint": "eslint src",
+    "dev": "nodemon --watch . -e js,md -i bin/ -i node_modules/ --exec 'eslint src && remark .'",
+    "lint": "eslint src && remark .",
     "serve": "nodemon --watch src -e js --exec babel-node src/index.js"
   },
   "dependencies": {
@@ -56,6 +56,8 @@
     "eslint": "^6.8.0",
     "eslint-config-airbnb-base": "^14.0.0",
     "eslint-plugin-import": "^2.20.1",
-    "nodemon": "^2.0.2"
+    "nodemon": "^2.0.2",
+    "remark-cli": "^7.0.1",
+    "remark-preset-lint-markdown-style-guide": "^2.1.3"
   }
 }

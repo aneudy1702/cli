@@ -6,42 +6,39 @@
 [![License](https://img.shields.io/github/license/open-containers-manager/cli)](https://github.com/open-containers-manager/cli/blob/master/LICENSE)
 
 ## Features
-- Download and install OCM VirtualBox VM
-- Expose Podman & Buildah commands seamlessly
-- Automatic forwarding of the exposed port in the virtual machine from containers to host
-- Automatic mount of the current directory in the virtual machine for build commands
-- Persistent storage in separate VMDK (`~/.ocm/ocm-persistent.vmdk`)
+  - Download and install OCM VirtualBox VM
+  - Expose Podman & Buildah commands seamlessly
+  - Automatic forwarding of the exposed port in the virtual machine from containers to host
+  - Automatic mount of the current directory in the virtual machine for build commands
+  - Persistent storage in separate VMDK (`~/.ocm/ocm-persistent.vmdk`)
 
 ## Limitations
-- Podman `build` & Buildah `build-using-dockerfile`, `bud`, `add`, `copy`, `unshare` commands should be used with a relative path under current directory (current directory is mounted in the virtual machine)
-- Mounting a host volume in containers is not supported
-- Remove OCM virtual machine from VirtualBox __removes persistent storage__, detaches it before
+  - Podman `build` & Buildah `build-using-dockerfile`, `bud`, `add`, `copy`, `unshare` commands should be used with a relative path under current directory (current directory is mounted in the virtual machine)
+  - Mounting a host volume in containers is not supported
+  - Remove OCM virtual machine from VirtualBox **removes persistent storage**, detaches it before
 
 ## Requirements
-
-* Linux, MacOS X or Windows with nodejs v10.
-* VirtualBox
+  - Linux, MacOS X or Windows with nodejs v10.
+  - VirtualBox
 
 ## Install
-
-```
-$ npm -g i @open-containers-manager/cli
+```bash
+npm -g i @open-containers-manager/cli
 ```
 
 or from source
 
+```bash
+npm i
+npm run build
+npm -g i file:$PWD
 ```
-$ npm i
-$ npm run build
-$ npm -g i file:$PWD
-```
-
 
 > Exposes four global commands : `ocm`, `podman`, `buildah` and `ocm-daemon`.
 
 ## Usage
 ### OCM
-```
+```text
 Usage:
   ocm [command]
 
@@ -54,24 +51,23 @@ Available commands:
 ```
 
 ### Podman
-```
+```text
 Use "podman --help" for more informations about command.
 ```
 
 ### Buildah
-```
+```text
 Use "buildah --help" for more informations about command.
 ```
 
 ### OCM Daemon
 Starts automatically in background with each of the above commands if it is not already active.
 
-```
-$ ocm-daemon
+```bash
+ocm-daemon
 ```
 
 > Can be started manually before ocm `start` command for debugging purposes
 
 ## License
-
 MIT © Tony Duburque
