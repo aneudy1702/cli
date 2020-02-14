@@ -10,7 +10,8 @@
     "ocm": "./bin/index.js",
     "ocm-daemon": "./bin/daemon.js",
     "podman": "./bin/podman.js",
-    "buildah": "./bin/buildah.js"
+    "buildah": "./bin/buildah.js",
+    "docker": "./bin/docker.js"
   },
   "scripts": {
     "build": "babel src --out-dir bin",
